@@ -1,9 +1,12 @@
+#include <algorithm> // std::find_if
 #include <cerrno> // cerrno
 #include <cstdint>
 #include <cstdio> // std::perror, std::fprintf, std::printf
 #include <cstdlib>
 #include <cstring> // std::strerror
-#include <string> // std::string
+#include <set>
+#include <unordered_map>
+#include <vector>
 #include <arpa/inet.h>
 #include <ifaddrs.h> // ::freeifaddrs, ::getifaddrs
 #include <linux/if_link.h> // rtnl_link_stats
@@ -12,68 +15,103 @@
 #include <sys/types.h> // ::freeifaddrs, ::getifaddrs
 #include <unistd.h>
 
-const char*
-family_to_string(int family) {
-    switch(family) {
-        case AF_PACKET: return "AF_PACKET";
-        case AF_INET: return "AF_INET";
-        case AF_INET6: return "AF_INET6";
-        default: return "?";
-    }
-}
+namespace net {
 
-struct Interface {
-    std::string name;
-    int flags;
-    int family;
-    std::string address;
-    std::string service;
-    uint32_t tx_packets;
-    uint32_t rx_packets;
-    uint32_t tx_bytes;
-    uint32_t rx_bytes;
-};
+    const char*
+    family_to_string(int family) {
+        switch(family) {
+            case AF_PACKET: return "AF_PACKET";
+            case AF_INET: return "AF_INET";
+            case AF_INET6: return "AF_INET6";
+            default: return "?";
+        }
+    }
+
+    struct AddrStats {
+        std::string address;
+        std::string service;
+        uint32_t tx_packets;
+        uint32_t rx_packets;
+        uint32_t tx_bytes;
+        uint32_t rx_bytes;
+    };
+
+    struct Interface {
+        std::string name;
+        uint32_t flags;
+        std::vector<int32_t> families;
+        std::vector<AddrStats> addresses;
+    };
+
+    std::vector<Interface>
+    get_interfaces() {
+        std::unordered_map<std::string, Interface> result;
+
+        ifaddrs* ifs = nullptr;
+        int rv = ::getifaddrs(&ifs);
+        if (rv == -1) {
+            std::fprintf(stderr, "Error: getifaddrs: %s", std::strerror(errno));
+            return {};
+        }
+
+        for (ifaddrs* i = ifs; i != nullptr; i = i->ifa_next) {
+            if (i->ifa_addr == nullptr) continue;
+
+            const std::string name = i->ifa_name;
+            result[name].name = name;
+            result[name].flags = i->ifa_flags;
+            result[name].families.emplace_back(i->ifa_addr->sa_family);
+
+            char host[NI_MAXHOST] = {};
+            char service[NI_MAXSERV] = {};
+            if (i->ifa_addr->sa_family == AF_INET || i->ifa_addr->sa_family == AF_INET6) {
+                rv = getnameinfo(i->ifa_addr, sizeof(sockaddr_storage), host, NI_MAXHOST,
+                                 service, NI_MAXSERV, NI_NUMERICHOST);
+                if (rv != 0) {
+                    std::fprintf(stderr, "Error: getnameinfo: %s\n", ::gai_strerror(rv));
+                    ::freeifaddrs(ifs);
+                    return {};
+                }
+            }
+            if (host[0] == '\0') continue;
+            AddrStats as = {};
+            as.address = host;
+            as.service = service;
+
+            if (i->ifa_data != nullptr) {
+                rtnl_link_stats* stats = static_cast<rtnl_link_stats*>(i->ifa_data);
+                as.tx_packets = stats->tx_packets;
+                as.rx_packets = stats->rx_packets;
+                as.tx_bytes = stats->tx_bytes;
+                as.rx_bytes = stats->rx_bytes;
+            }
+            result[name].addresses.emplace_back(as);
+        }
+        ::freeifaddrs(ifs);
+
+        std::vector<Interface> vec;
+        for (const auto& elem : result) {
+            vec.emplace_back(elem.second);
+        }
+        return vec;
+    }
+
+} // namespace net
 
 
 int main(int, char**) {
-    ifaddrs* ifaddr;
+    std::vector<net::Interface> interfaces = net::get_interfaces();
 
-    int rv = ::getifaddrs(&ifaddr);
-    if (rv == -1) {
-        std::fprintf(stderr, "Error: getifaddrs: %s", std::strerror(errno));
-        return 1;
-    }
-
-    for (ifaddrs* ifa = ifaddr; ifa != nullptr; ifa = ifa->ifa_next) {
-        if (ifa->ifa_addr == nullptr) continue;
-
-        int family = ifa->ifa_addr->sa_family;
-        char host[NI_MAXHOST] = {};
-        char service[NI_MAXSERV] = {};
-        unsigned tx_packets = 0, rx_packets = 0;
-        unsigned tx_bytes = 0, rx_bytes = 0;
-
-        if (family == AF_INET || family == AF_INET6) {
-            rv = getnameinfo(ifa->ifa_addr, sizeof(sockaddr_storage), host, NI_MAXHOST,
-                    service, NI_MAXSERV, NI_NUMERICHOST);
-            if (rv != 0) {
-                std::fprintf(stderr, "Error: getnameinfo: %s\n", ::gai_strerror(rv));
-                return 1;
-            }
-        } else if (family == AF_PACKET && ifa->ifa_data != NULL) {
-            rtnl_link_stats* stats = static_cast<rtnl_link_stats*>(ifa->ifa_data);
-            tx_packets = stats->tx_packets;
-            rx_packets = stats->rx_packets;
-            tx_bytes = stats->tx_bytes;
-            rx_bytes = stats->rx_bytes;
+    std::printf("Number of interfaces: %zu\n", interfaces.size());
+    for (const auto& i : interfaces) {
+        std::printf("%s\n    families: ", i.name.c_str());
+        for(const auto& f : i.families) {
+            std::printf("%s,", net::family_to_string(f));
         }
-
-
-        std::printf("name=%s,flags=0x%x,family=%s,address=%s,service=%s,tx_packets=%u,rx_packets=%u,tx_bytes=%u,rx_bytes=%u\n",
-                    ifa->ifa_name, ifa->ifa_flags, ::family_to_string(family), host, service,
-                    tx_packets, rx_packets, tx_bytes, rx_bytes);
-    } // for
-
-    ::freeifaddrs(ifaddr);
-    std::exit(EXIT_SUCCESS);
+        std::printf("\n");
+        for(const auto& a : i.addresses) {
+            std::printf("    address: %s, service=%s\n", a.address.c_str(), a.service.c_str());
+        }
+    }
+    return 0;
 }
