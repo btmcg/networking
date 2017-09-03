@@ -1,5 +1,6 @@
 #include <algorithm> // std::find_if
 #include <cerrno> // cerrno
+#include <cinttypes> // PRI
 #include <cstdint>
 #include <cstdio> // std::perror, std::fprintf, std::printf
 #include <cstdlib>
@@ -113,6 +114,9 @@ int main(int, char**) {
         std::printf("\n");
         for(const auto& a : i.addresses) {
             std::printf("    address: %s, service=%s\n", a.address.c_str(), a.service.c_str());
+            std::printf("        tx_packets=%" PRIu32 ", rx_packets=%" PRIu32 "\n", a.tx_packets,
+                        a.rx_packets);
+            std::printf("        tx_bytes=%" PRIu32 ", rx_bytes=%" PRIu32 "\n", a.tx_bytes, a.rx_bytes);
         }
     }
     return 0;
