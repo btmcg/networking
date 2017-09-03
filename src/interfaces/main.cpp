@@ -93,7 +93,8 @@ int main(int, char**) {
 
     std::printf("Number of interfaces: %zu\n", interfaces.size());
     for (const auto& i : interfaces) {
-        std::printf("%s\n    families: ", i.name.c_str());
+        std::printf("%s\n    flags: 0x%x\n", i.name.c_str(), i.flags);
+        std::printf("    families: ");
         for(const auto& f : i.families) {
             std::printf("%s,", net::family_to_string(f));
         }
@@ -105,10 +106,10 @@ int main(int, char**) {
                 std::printf("    address: %s, service=%s\n", address.c_str(), service.c_str());
             }
         }
-        std::printf("        multicast=%" PRIu32 "\n", i.stats.multicast);
-        std::printf("        rx_packets=%" PRIu32 ", rx_bytes=%" PRIu32 ", rx_errors=%" PRIu32 ", rx_dropped=%" PRIu32 "\n",
+        std::printf("    multicast=%" PRIu32 "\n", i.stats.multicast);
+        std::printf("    rx_packets=%" PRIu32 ", rx_bytes=%" PRIu32 ", rx_errors=%" PRIu32 ", rx_dropped=%" PRIu32 "\n",
                     i.stats.rx_packets, i.stats.rx_bytes, i.stats.rx_errors, i.stats.rx_dropped);
-        std::printf("        tx_packets=%" PRIu32 ", tx_bytes=%" PRIu32 ", tx_errors=%" PRIu32 ", tx_dropped=%" PRIu32 "\n",
+        std::printf("    tx_packets=%" PRIu32 ", tx_bytes=%" PRIu32 ", tx_errors=%" PRIu32 ", tx_dropped=%" PRIu32 "\n",
                     i.stats.tx_packets, i.stats.tx_bytes, i.stats.tx_errors, i.stats.tx_dropped);
     }
     return 0;
