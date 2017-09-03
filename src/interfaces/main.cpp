@@ -84,6 +84,7 @@ namespace net {
 
         // Copy map into vector
         std::vector<Interface> vec;
+        vec.reserve(map.size());
         std::transform(map.cbegin(), map.cend(), std::back_inserter(vec),
                        [](auto &kv){ return kv.second; });
         return vec;
@@ -110,11 +111,11 @@ int main(int, char**) {
                 std::printf("    address: %s, service=%s\n", address.c_str(), service.c_str());
             }
         }
-        std::printf("    multicast=%" PRIu32 "\n", i.stats.multicast);
         std::printf("    rx_packets=%" PRIu32 ", rx_bytes=%" PRIu32 ", rx_errors=%" PRIu32 ", rx_dropped=%" PRIu32 "\n",
                     i.stats.rx_packets, i.stats.rx_bytes, i.stats.rx_errors, i.stats.rx_dropped);
         std::printf("    tx_packets=%" PRIu32 ", tx_bytes=%" PRIu32 ", tx_errors=%" PRIu32 ", tx_dropped=%" PRIu32 "\n",
                     i.stats.tx_packets, i.stats.tx_bytes, i.stats.tx_errors, i.stats.tx_dropped);
+        std::printf("    multicast=%" PRIu32 "\n", i.stats.multicast);
     }
     return 0;
 }
