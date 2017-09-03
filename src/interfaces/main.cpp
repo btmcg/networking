@@ -45,7 +45,7 @@ namespace net {
 
     std::vector<Interface>
     get_interfaces() {
-        std::unordered_map<std::string, Interface> result;
+        std::unordered_map<std::string, Interface> map;
 
         ifaddrs* ifs = nullptr;
         int rv = ::getifaddrs(&ifs);
@@ -58,15 +58,17 @@ namespace net {
             if (i->ifa_addr == nullptr) continue;
 
             const std::string name = i->ifa_name;
-            result[name].name = name;
-            result[name].flags = i->ifa_flags;
-            result[name].families.emplace_back(i->ifa_addr->sa_family);
+            map[name].name = name;
+            map[name].flags = i->ifa_flags;
+            map[name].families.emplace_back(i->ifa_addr->sa_family);
 
+            // If the address is ipv4/6, then we can get the host and
+            // service names (in ip address form).
             char host[NI_MAXHOST] = {};
             char service[NI_MAXSERV] = {};
             if (i->ifa_addr->sa_family == AF_INET || i->ifa_addr->sa_family == AF_INET6) {
-                rv = getnameinfo(i->ifa_addr, sizeof(sockaddr_storage), host, NI_MAXHOST,
-                                 service, NI_MAXSERV, NI_NUMERICHOST);
+                rv = ::getnameinfo(i->ifa_addr, sizeof(sockaddr_storage), host, NI_MAXHOST,
+                                   service, NI_MAXSERV, NI_NUMERICHOST);
                 if (rv != 0) {
                     std::fprintf(stderr, "Error: getnameinfo: %s\n", ::gai_strerror(rv));
                     ::freeifaddrs(ifs);
@@ -85,14 +87,14 @@ namespace net {
                 as.tx_bytes = stats->tx_bytes;
                 as.rx_bytes = stats->rx_bytes;
             }
-            result[name].addresses.emplace_back(as);
+            map[name].addresses.emplace_back(as);
         }
         ::freeifaddrs(ifs);
 
+        // Copy map into vector
         std::vector<Interface> vec;
-        for (const auto& elem : result) {
-            vec.emplace_back(elem.second);
-        }
+        std::transform(map.cbegin(), map.cend(), std::back_inserter(vec),
+                       [](auto &kv){ return kv.second; });
         return vec;
     }
 
