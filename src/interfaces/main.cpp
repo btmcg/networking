@@ -76,7 +76,6 @@ namespace net {
                     return {};
                 }
             }
-            if (host[0] == '\0') continue;
             AddrStats as = {};
             as.address = host;
             as.service = service;
@@ -113,7 +112,9 @@ int main(int, char**) {
         }
         std::printf("\n");
         for(const auto& a : i.addresses) {
-            std::printf("    address: %s, service=%s\n", a.address.c_str(), a.service.c_str());
+            if(!a.address.empty()) {
+                std::printf("    address: %s, service=%s\n", a.address.c_str(), a.service.c_str());
+            }
             std::printf("        tx_packets=%" PRIu32 ", rx_packets=%" PRIu32 "\n", a.tx_packets,
                         a.rx_packets);
             std::printf("        tx_bytes=%" PRIu32 ", rx_bytes=%" PRIu32 "\n", a.tx_bytes, a.rx_bytes);
