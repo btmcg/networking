@@ -28,20 +28,12 @@ namespace net {
         }
     }
 
-    struct AddrStats {
-        std::string address;
-        std::string service;
-        uint32_t tx_packets;
-        uint32_t rx_packets;
-        uint32_t tx_bytes;
-        uint32_t rx_bytes;
-    };
-
     struct Interface {
         std::string name;
         uint32_t flags;
         std::vector<int32_t> families;
-        std::vector<AddrStats> addresses;
+        std::vector<std::tuple<std::string, std::string>> addresses;
+        rtnl_link_stats stats;
     };
 
     std::vector<Interface>
@@ -76,18 +68,13 @@ namespace net {
                     return {};
                 }
             }
-            AddrStats as = {};
-            as.address = host;
-            as.service = service;
 
+            // Statistics (see linux/if_link.h)
             if (i->ifa_data != nullptr) {
-                rtnl_link_stats* stats = static_cast<rtnl_link_stats*>(i->ifa_data);
-                as.tx_packets = stats->tx_packets;
-                as.rx_packets = stats->rx_packets;
-                as.tx_bytes = stats->tx_bytes;
-                as.rx_bytes = stats->rx_bytes;
+                map[name].stats = *static_cast<rtnl_link_stats*>(i->ifa_data);
             }
-            map[name].addresses.emplace_back(as);
+
+            map[name].addresses.emplace_back(std::make_tuple(host, service));
         }
         ::freeifaddrs(ifs);
 
@@ -112,13 +99,17 @@ int main(int, char**) {
         }
         std::printf("\n");
         for(const auto& a : i.addresses) {
-            if(!a.address.empty()) {
-                std::printf("    address: %s, service=%s\n", a.address.c_str(), a.service.c_str());
+            const std::string& address = std::get<0>(a);
+            const std::string& service = std::get<1>(a);
+            if(!address.empty()) {
+                std::printf("    address: %s, service=%s\n", address.c_str(), service.c_str());
             }
-            std::printf("        tx_packets=%" PRIu32 ", rx_packets=%" PRIu32 "\n", a.tx_packets,
-                        a.rx_packets);
-            std::printf("        tx_bytes=%" PRIu32 ", rx_bytes=%" PRIu32 "\n", a.tx_bytes, a.rx_bytes);
         }
+        std::printf("        multicast=%" PRIu32 "\n", i.stats.multicast);
+        std::printf("        rx_packets=%" PRIu32 ", rx_bytes=%" PRIu32 ", rx_errors=%" PRIu32 ", rx_dropped=%" PRIu32 "\n",
+                    i.stats.rx_packets, i.stats.rx_bytes, i.stats.rx_errors, i.stats.rx_dropped);
+        std::printf("        tx_packets=%" PRIu32 ", tx_bytes=%" PRIu32 ", tx_errors=%" PRIu32 ", tx_dropped=%" PRIu32 "\n",
+                    i.stats.tx_packets, i.stats.tx_bytes, i.stats.tx_errors, i.stats.tx_dropped);
     }
     return 0;
 }
