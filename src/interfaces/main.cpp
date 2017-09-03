@@ -1,5 +1,6 @@
 #include <algorithm> // std::find_if
-#include <cerrno> // cerrno
+#include <cassert> // assert
+#include <cerrno> // errno
 #include <cinttypes> // PRI
 #include <cstdint>
 #include <cstdio> // std::perror, std::fprintf, std::printf
@@ -52,6 +53,7 @@ namespace net {
 
             const std::string name = i->ifa_name;
             map[name].name = name;
+            assert(map[name].flags == 0);
             map[name].flags = i->ifa_flags;
             map[name].families.emplace_back(i->ifa_addr->sa_family);
 
@@ -71,6 +73,7 @@ namespace net {
 
             // Statistics (see linux/if_link.h)
             if (i->ifa_data != nullptr) {
+                assert(map[name].stats.rx_packets == 0);
                 map[name].stats = *static_cast<rtnl_link_stats*>(i->ifa_data);
             }
 
