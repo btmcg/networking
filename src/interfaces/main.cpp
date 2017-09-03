@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <cstring> // std::strerror
 #include <set>
+#include <tuple>
 #include <unordered_map>
 #include <vector>
 #include <arpa/inet.h>
@@ -92,7 +93,7 @@ namespace net {
 
 
 int main(int, char**) {
-    std::vector<net::Interface> interfaces = net::get_interfaces();
+    const std::vector<net::Interface> interfaces = net::get_interfaces();
 
     std::printf("Number of interfaces: %zu\n", interfaces.size());
     for (const auto& i : interfaces) {
