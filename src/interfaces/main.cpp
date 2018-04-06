@@ -3,7 +3,7 @@
 #include <cerrno> // errno
 #include <cinttypes> // PRI
 #include <cstdint>
-#include <cstdio> // std::perror, std::fprintf, std::printf
+#include <cstdio> // std::fprintf, std::printf
 #include <cstdlib>
 #include <cstring> // std::strerror
 #include <set>
