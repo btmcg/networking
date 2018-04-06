@@ -30,13 +30,13 @@ int main(int, char**)
     do {
         rbytes = ::read(STDIN_FILENO, buf, sizeof(buf));
         ssize_t wbytes = ::write(fd, buf, static_cast<std::size_t>(rbytes));
-        if (wbytes == rbytes) continue;
-
-        if (wbytes > 0) {
-            std::fprintf(stderr, "partial write");
-        } else {
+        if (wbytes == -1) {
             std::fprintf(stderr, "[error] write: %s", std::strerror(errno));
             return 1;
+        }
+
+        if (wbytes < rbytes) {
+            std::fprintf(stderr, "partial write");
         }
     } while (rbytes > 0);
 
