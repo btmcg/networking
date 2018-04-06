@@ -7,3 +7,5 @@ lib/
 *.so
 
 interfaces
+unix_client
+unix_server
