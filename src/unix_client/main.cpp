@@ -1,9 +1,9 @@
 #include <cerrno> // for errno
 #include <cstdio> // for std::fprintf, std::printf
-#include <cstring> // for std::strerror
-#include <sys/socket.h> // for ::accept, ::bind, ::listen, ::socket
+#include <cstring> // for std::strerror, std::strncpy
+#include <sys/socket.h> // for ::connect, ::socket
 #include <sys/un.h> // for sockaddr_un
-#include <unistd.h> // for ::read
+#include <unistd.h> // for ::read, ::write
 
 const char* socket_path = "\0socket";
 

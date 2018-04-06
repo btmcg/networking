@@ -1,6 +1,6 @@
 #include <cerrno> // for errno
 #include <cstdio> // for std::fprintf, std::printf
-#include <cstring> // for std::strerror
+#include <cstring> // for std::strerror, std::strncpy
 #include <sys/socket.h> // for ::accept, ::bind, ::listen, ::socket
 #include <sys/un.h> // for sockaddr_un
 #include <unistd.h> // for ::read
