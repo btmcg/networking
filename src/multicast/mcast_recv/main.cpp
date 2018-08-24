@@ -12,7 +12,7 @@ namespace { // anonymous
         std::fprintf(f, "usage: %s [-h] [-i <interface>] <group> [[<group>] ...]\n", app);
         std::fprintf(f,
             "positional arguments:\n"
-            "   group       multicast group in the form 'ip:port'\n"
+            "   group               multicast group in the form 'ip:port'\n"
             "optional arguments:\n"
             "   -h, --help          show this help message and exit\n"
             "   -i, --interface     network interface name (e.g. eno1, lo)\n");
