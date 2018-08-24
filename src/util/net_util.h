@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <string>
+#include <string_view>
 #include <tuple>
 #include <vector>
 
@@ -23,5 +24,10 @@ namespace net {
 
     // Parses string of form "ip:port"
     std::tuple<std::string, std::uint16_t> parse_ip_port(const std::string&);
+
+    /// Resolve interface name to ip
+    /// \returns Empty string if invalid interface
+    /// \throws std::exception If unexpected error
+    std::string resolve_interface(std::string_view);
 
 } // namespace net

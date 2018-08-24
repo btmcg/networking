@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <cstdio> // for std::fprintf, std::printf
 #include <cstdlib>
-#include <cstring> // for std::strerror
+#include <cstring> // for std::strerror, std::strlen
 #include <set>
 #include <unordered_map>
 
@@ -97,6 +97,51 @@ namespace net {
             return error;
 
         return std::make_tuple(ip, static_cast<std::uint16_t>(std::stoi(port)));
+    }
+
+    std::string
+    resolve_interface(std::string_view name) {
+        static std::string error;
+
+        if (name.empty())
+            return error;
+
+        ifaddrs* ifs = nullptr;
+        int rv = ::getifaddrs(&ifs);
+        if (rv == -1)
+            throw std::runtime_error(std::string("error: getifaddrs: ") + std::strerror(errno));
+
+        std::string address;
+        for (ifaddrs* i = ifs; i != nullptr; i = i->ifa_next) {
+            if (i->ifa_addr == nullptr)
+                continue;
+
+            if (name != i->ifa_name)
+                continue;
+
+            // If the address is ipv4/6, then we can get the host and
+            // service names (in ip address form).
+            char host[NI_MAXHOST] = {};
+            char service[NI_MAXSERV] = {};
+            if (i->ifa_addr->sa_family == AF_INET || i->ifa_addr->sa_family == AF_INET6) {
+                rv = ::getnameinfo(i->ifa_addr, sizeof(sockaddr_storage), host, sizeof(host),
+                    service, sizeof(service), NI_NUMERICHOST);
+                if (rv != 0) {
+                    ::freeifaddrs(ifs);
+                    throw std::runtime_error(std::string("error: getnameinfo: ")
+                        + ::gai_strerror(rv));
+                }
+            }
+
+            if (std::strlen(host) == 0)
+                continue;
+
+            address.assign(host);
+            break;
+        }
+
+        ::freeifaddrs(ifs);
+        return address;
     }
 
 } // namespace net
