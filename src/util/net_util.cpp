@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <cstring> // for std::strerror, std::strlen
 #include <set>
+#include <stdexcept>
 #include <unordered_map>
 
 #include <arpa/inet.h>
@@ -35,10 +36,8 @@ namespace net {
 
         ifaddrs* ifs = nullptr;
         int rv = ::getifaddrs(&ifs);
-        if (rv == -1) {
-            std::fprintf(stderr, "Error: getifaddrs: %s", std::strerror(errno));
-            return {};
-        }
+        if (rv == -1)
+            throw std::runtime_error(std::string("error: getifaddrs: ") + std::strerror(errno));
 
         for (ifaddrs* i = ifs; i != nullptr; i = i->ifa_next) {
             if (i->ifa_addr == nullptr) continue;
@@ -54,12 +53,12 @@ namespace net {
             char host[NI_MAXHOST] = {};
             char service[NI_MAXSERV] = {};
             if (i->ifa_addr->sa_family == AF_INET || i->ifa_addr->sa_family == AF_INET6) {
-                rv = ::getnameinfo(i->ifa_addr, sizeof(sockaddr_storage), host, NI_MAXHOST,
-                                   service, NI_MAXSERV, NI_NUMERICHOST);
+                rv = ::getnameinfo(i->ifa_addr, sizeof(sockaddr_storage), host, sizeof(host),
+                    service, sizeof(service), NI_NUMERICHOST);
                 if (rv != 0) {
-                    std::fprintf(stderr, "Error: getnameinfo: %s\n", ::gai_strerror(rv));
                     ::freeifaddrs(ifs);
-                    return {};
+                    throw std::runtime_error(std::string("error: getnameinfo: ")
+                        + ::gai_strerror(rv));
                 }
             }
 
