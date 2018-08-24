@@ -1,5 +1,6 @@
 #include "mcast_recv.h"
-#include <getopt.h>
+#include "util/net_util.h"
+
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib> // for ::exit
@@ -8,35 +9,18 @@
 #include <string>
 #include <string_view>
 #include <tuple>
+
 #include <arpa/inet.h>
 #include <endian.h>
-#include <netinet/in.h>
+#include <getopt.h>
 #include <net/if.h> // IFNAMSIZ
+#include <netinet/in.h>
 #include <poll.h>
 #include <sys/ioctl.h> // for ::ioctl
 #include <sys/socket.h> // for ::recvmsg, ::setsockopt, ::socket
 #include <sys/types.h>
 #include <unistd.h> // for ::close
 
-namespace { // anonymous
-    // TODO: Move to utils
-    std::tuple<std::string, std::uint16_t>
-    parse_ip_port(const std::string& ip_port) {
-        static auto error = std::make_tuple("", 0);
-
-        const std::string::size_type colon = ip_port.find_first_of(':');
-        if (colon == std::string::npos)
-            return error;
-
-        const std::string ip = ip_port.substr(0, colon);
-        const std::string port = ip_port.substr(colon + 1);
-
-        if (ip.empty() || port.empty())
-            return error;
-
-        return std::make_tuple(ip, static_cast<std::uint16_t>(std::stoi(port)));
-    }
-} // namespace anonymous
 
 McastRecv::McastRecv(const Config& cfg)
         : cfg_(cfg)
@@ -62,7 +46,7 @@ McastRecv::McastRecv(const Config& cfg)
     groups_.reserve(cfg_.groups.size());
     for (const auto& g : cfg_.groups) {
         std::string ip; std::uint16_t port;
-        std::tie(ip, port) = parse_ip_port(g);
+        std::tie(ip, port) = net::parse_ip_port(g);
         if (ip.empty() || port == 0)
             throw std::runtime_error("invalid group: " + g);
         groups_.emplace_back(MulticastGroup{-1, ip, port});
