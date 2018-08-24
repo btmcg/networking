@@ -21,9 +21,11 @@ namespace net {
     /// \throws std::exception On unexpected error
     std::vector<Interface> get_interfaces();
 
+    /// \returns Empty string if unknown family
     const char* family_to_string(int family);
 
-    // Parses string of form "ip:port"
+    /// Parses string of form "ip:port"
+    /// \returns Tuple of {empty string, 0} if invalid format
     std::tuple<std::string, std::uint16_t> parse_ip_port(const std::string&);
 
     /// Resolve interface name to ip
