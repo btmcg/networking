@@ -71,7 +71,7 @@ ifdef DEBUG
   OPTFLAGS := -O0 -fno-inline
   WARN += -Wno-error
 else
-  OPTFLAGS := -O3 -flto -DNDEBUG
+  OPTFLAGS := -O3 -DNDEBUG
 endif
 
 # compiler flags
