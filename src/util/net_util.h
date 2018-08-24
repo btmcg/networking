@@ -21,4 +21,7 @@ namespace net {
 
     const char* family_to_string(int family);
 
+    // Parses string of form "ip:port"
+    std::tuple<std::string, std::uint16_t> parse_ip_port(const std::string&);
+
 } // namespace net

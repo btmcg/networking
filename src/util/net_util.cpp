@@ -81,4 +81,22 @@ namespace net {
         return vec;
     }
 
+
+    std::tuple<std::string, std::uint16_t>
+    parse_ip_port(const std::string& ip_port) {
+        static auto error = std::make_tuple("", 0);
+
+        const std::string::size_type colon = ip_port.find_first_of(':');
+        if (colon == std::string::npos)
+            return error;
+
+        const std::string ip = ip_port.substr(0, colon);
+        const std::string port = ip_port.substr(colon + 1);
+
+        if (ip.empty() || port.empty())
+            return error;
+
+        return std::make_tuple(ip, static_cast<std::uint16_t>(std::stoi(port)));
+    }
+
 } // namespace net
