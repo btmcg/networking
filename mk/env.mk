@@ -7,36 +7,43 @@
 # standardize on good ol' Bourne shell
 SHELL := /bin/sh
 
+# either 'gcc' or 'clang'
+COMPILER := gcc
+
+ifeq (,$(findstring $(COMPILER),gcc clang))
+  $(error "Invalid value COMPILER=$(COMPILER), must be either 'gcc' or 'clang'")
+endif
+
+include mk/env_$(COMPILER).mk
+
 
 # output directories
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 BIN_DIR := bin
 LIB_DIR := lib
 
 
 # command variables
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-CC      := gcc
-CP      := cp -f
-CXX     := g++
+AR      := ar rcs
+CP      := cp --force
 DOXYGEN := doxygen
-MKDIR   := mkdir -p
-MV      := mv -f
-RM      := rm -f
+MKDIR   := mkdir --parents
+MV      := mv --force
+RM      := rm --force
 RMDIR   := rmdir
 
 
 # compiler and linker flags
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+TARGET_ARCH := -march=native
 
-# gcc warning flags
-CPPWFLAGS += \
+# c/c++ warning flags
+WARN := \
+  -pedantic-errors \
   -Wall \
   -Wcast-align \
   -Wcast-qual \
-  -Wconversion \
   -Wdisabled-optimization \
   -Wempty-body \
   -Werror \
@@ -44,36 +51,34 @@ CPPWFLAGS += \
   -Wfloat-equal \
   -Wformat=2 \
   -Wmissing-include-dirs \
-  -Wshadow \
-  -Wsign-conversion \
-  -Wswitch-default \
-  -Wswitch-enum \
+  -Wno-deprecated-declarations \
   -Wundef \
   -Wuninitialized
-CWFLAGS   +=
-CXXWFLAGS += \
+
+# c-specific warning flags
+CC_WARN :=
+
+# c++-specific warning flags
+CXX_WARN := \
+  -fno-operator-names \
   -Wctor-dtor-privacy \
   -Wnon-virtual-dtor \
   -Woverloaded-virtual \
-  -Wsuggest-final-methods \
-  -Wsuggest-final-types \
-  -Wsuggest-override \
-  -Wuseless-cast \
   -Wzero-as-null-pointer-constant
 
 # gcc optimization flags
 ifdef DEBUG
   OPTFLAGS := -O0 -fno-inline
-  CPPWFLAGS += -Wno-error
+  WARN += -Wno-error
 else
   OPTFLAGS := -O3 -flto -DNDEBUG
 endif
 
 # compiler flags
-CPPFLAGS += -ggdb3 -fstrict-aliasing -pedantic-errors $(CPPWFLAGS) -MMD -fPIC $(OPTFLAGS) -iquotesrc
-CXXFLAGS += -fno-operator-names $(CXXWFLAGS) -std=c++14
-CFLAGS   += $(CWFLAGS) -std=c11
+CPPFLAGS += -ggdb3 -fstrict-aliasing $(WARN) -MMD $(OPTFLAGS) -iquote src
+CXXFLAGS += -std=c++17 $(CXX_WARN)
+CFLAGS   += -std=c11 $(CC_WARN)
 
 # linker flags
-LDFLAGS += -rdynamic -Wl,-rpath=$(LIB_DIR),--enable-new-dtags
-LDLIBS  += -lrt -lpthread
+LDFLAGS += $(OPTFLAGS) -Wl,-rpath=$(LIB_DIR),--enable-new-dtags
+LDLIBS  += -ldl -lrt -pthread

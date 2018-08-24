@@ -20,10 +20,9 @@ include mk/third_party.mk
 # o Create module_example.mk, documenting all of the LOCAL_* variables
 #   that can be defined. (Perhaps also provide a module_example_minimal.mk
 #   which simply defines the bare essentials (LOCAL_PATH, add_module())?
-# o Add support for static libraries.
 # o Add test examples:
 #   - a subdirectory (under src/) that contains several modules
-#   - an executable several levels deep (e.g., src/a/b/c/d/e/module.mk)
+#   - an executable several levels deep (e.g., src/a/b/c/d/e/Module.mk)
 # o Add support for make v3.81 and below
 # o Add support for OSX wackiness
 # o Add ability to clean just one module (e.g., make module clean)
@@ -36,7 +35,7 @@ include mk/third_party.mk
 # initialization
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-# load modules (any subdirectory that contains a "module.mk" file)
+# load modules (any subdirectory that contains a "Module.mk" file)
 $(call load-modules)
 
 
