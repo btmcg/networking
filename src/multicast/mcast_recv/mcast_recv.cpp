@@ -1,6 +1,7 @@
 #include "mcast_recv.h"
 #include "util/net_util.h"
 
+#include <cerrno>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib> // for ::exit
