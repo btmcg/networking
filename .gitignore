@@ -12,3 +12,5 @@ mcast_send
 tcp_echo_server
 unix_client
 unix_server
+
+src/version.h

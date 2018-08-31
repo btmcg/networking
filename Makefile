@@ -2,6 +2,7 @@ include mk/env.mk
 include mk/functions.mk
 include mk/pattern_rules.mk
 include mk/third_party.mk
+include mk/version.mk
 
 
 # FIXME:
@@ -57,6 +58,7 @@ all: $(call get-all-modules)
 clean:
 	$(if $(wildcard $(call get-all-targets) $(call get-all-objs) $(call get-all-deps)),\
 		$(RM) $(strip $(call get-all-targets)) $(call get-all-objs) $(call get-all-deps))
+	$(if $(wildcard $(VERSION_FILE)),$(RM) $(VERSION_FILE))
 
 distclean: clean
 	$(if $(wildcard $(LIB_DIR)),\

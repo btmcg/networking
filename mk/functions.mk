@@ -164,6 +164,8 @@ add-shared-library-module =\
   $(eval LOCAL_MODULE ?= $(notdir $(LOCAL_PATH)))\
   $(eval __modules.$(LOCAL_MODULE).LOCAL_TARGET := $(LOCAL_PATH)/lib$(LOCAL_MODULE).so)\
   $(eval __modules.$(LOCAL_MODULE).LOCAL_TYPE   := shared_library)\
+  $(eval __modules.$(LOCAL_MODULE).LOCAL_CPPFLAGS += -fPIC)\
+  $(eval __modules.$(LOCAL_MODULE).LOCAL_LDFLAGS  += -fPIC -shared)\
   $(call _add-module,$(LOCAL_MODULE))
 
 
@@ -196,16 +198,16 @@ _add-module =\
   ,\
     $(eval __local_src := $(wildcard $(LOCAL_PATH)/*.cpp))\
   )\
-  $(eval __modules.$1.LOCAL_CFLAGS           := $(LOCAL_CFLAGS))\
-  $(eval __modules.$1.LOCAL_CPPFLAGS         := $(LOCAL_CPPFLAGS))\
-  $(eval __modules.$1.LOCAL_CXXFLAGS         := $(LOCAL_CXXFLAGS))\
-  $(eval __modules.$1.LOCAL_DEPS             := $(call convert-c-cpp-suffix-to,$(__local_src),d))\
-  $(eval __modules.$1.LOCAL_LDFLAGS          := $(LOCAL_LDFLAGS))\
-  $(eval __modules.$1.LOCAL_LDLIBS           := $(addprefix -l,$(LOCAL_LIBRARIES)) $(LOCAL_LDLIBS))\
-  $(eval __modules.$1.LOCAL_OBJS             := $(call convert-c-cpp-suffix-to,$(__local_src),o))\
-  $(eval __modules.$1.LOCAL_PATH             := $(LOCAL_PATH))\
-  $(eval __modules.$1.LOCAL_LIBRARIES        := $(LOCAL_LIBRARIES))\
-  $(eval __modules.$1.LOCAL_SOURCE_FILES     := $(__local_src))\
+  $(eval __modules.$1.LOCAL_CFLAGS       += $(LOCAL_CFLAGS))\
+  $(eval __modules.$1.LOCAL_CPPFLAGS     += $(LOCAL_CPPFLAGS))\
+  $(eval __modules.$1.LOCAL_CXXFLAGS     += $(LOCAL_CXXFLAGS))\
+  $(eval __modules.$1.LOCAL_DEPS         += $(call convert-c-cpp-suffix-to,$(__local_src),d))\
+  $(eval __modules.$1.LOCAL_LDFLAGS      += $(LOCAL_LDFLAGS))\
+  $(eval __modules.$1.LOCAL_LDLIBS       += $(addprefix -l,$(LOCAL_LIBRARIES)) $(LOCAL_LDLIBS))\
+  $(eval __modules.$1.LOCAL_OBJS         += $(call convert-c-cpp-suffix-to,$(__local_src),o))\
+  $(eval __modules.$1.LOCAL_PATH         += $(LOCAL_PATH))\
+  $(eval __modules.$1.LOCAL_LIBRARIES    += $(LOCAL_LIBRARIES))\
+  $(eval __modules.$1.LOCAL_SOURCE_FILES += $(__local_src))\
   $(eval __all_modules += $1)\
   $(call clear-vars)
 
@@ -234,20 +236,28 @@ build-local-target-rules =\
   $(eval $(__modules.$1.LOCAL_TARGET): $(__modules.$1.LOCAL_OBJS))\
   $(eval $(__modules.$1.LOCAL_TARGET): $(__modules.$1.LOCAL_PATH)/Module.mk)\
   $(eval $(__modules.$1.LOCAL_TARGET):| $(BIN_DIR) $(LIB_DIR))\
-  $(if $(filter shared_library,$(__modules.$1.LOCAL_TYPE)),\
-    $(eval $(__modules.$1.LOCAL_TARGET): CPPFLAGS += -fPIC)\
-    $(eval $(__modules.$1.LOCAL_TARGET): LDFLAGS += -shared)\
-  )\
-  $(if $(filter static_library,$(__modules.$1.LOCAL_TYPE)),\
-    $(eval $(__modules.$1.LOCAL_TARGET): LDFLAGS += -static)\
-  )\
   $(foreach other_module,$(__modules.$1.LOCAL_LIBRARIES),\
     $(eval $(__modules.$1.LOCAL_TARGET): $(__modules.$(other_module).LOCAL_TARGET))\
-    $(eval $(__modules.$1.LOCAL_TARGET): LOCAL_LDFLAGS += $(__modules.$(other_module).LOCAL_LDFLAGS))\
-    $(eval $(__modules.$1.LOCAL_TARGET): LOCAL_LDLIBS  += $(__modules.$(other_module).LOCAL_LDLIBS))\
     $(eval $(__modules.$1.LOCAL_TARGET): $(__modules.$(other_module).LOCAL_PATH)/Module.mk)\
   )
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# function : build-internal-dependencies
+# arguments: 1: module name
+# returns  : nothing
+# usage    : $(call build-internal-dependencies,<module_name>)
+# rationale: internal dependencies are based on the values given in
+#            LOCAL_LIBRARIES, so for each module provided, append all
+#            flags from that module to this module
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+build-internal-dependencies =\
+  $(foreach other_module,$(__modules.$1.LOCAL_LIBRARIES),\
+    $(eval __modules.$1.LOCAL_CPPFLAGS += $(__modules.$(other_module).LOCAL_CPPFLAGS))\
+    $(eval __modules.$1.LOCAL_CFLAGS += $(__modules.$(other_module).LOCAL_CFLAGS))\
+    $(eval __modules.$1.LOCAL_CXXFLAGS += $(__modules.$(other_module).LOCAL_CXXFLAGS))\
+    $(eval __modules.$1.LOCAL_LDFLAGS += $(__modules.$(other_module).LOCAL_LDFLAGS))\
+    $(eval __modules.$1.LOCAL_LDLIBS += $(__modules.$(other_module).LOCAL_LDLIBS))\
+  )
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # function : build-object-rules
@@ -280,8 +290,9 @@ build-rules =\
   $(foreach module,$1,\
     $(call build-module-rules,$(module))\
     $(call build-local-target-rules,$(module))\
+    $(call build-internal-dependencies,$(module))\
     $(call build-object-rules,$(module))\
-    $(eval -include $(__modules.$1.LOCAL_DEPS))\
+    $(eval -include $(__modules.$(module).LOCAL_DEPS))\
     \
     $(if $(filter executable,$(__modules.$(module).LOCAL_TYPE)),\
       $(call build-executable,$(module))\
