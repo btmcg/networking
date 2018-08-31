@@ -6,11 +6,11 @@ lib/
 *.o
 *.so
 
-interfaces
-mcast_recv
-mcast_send
-tcp_echo_server
-unix_client
-unix_server
+src/interfaces/interfaces
+src/multicast/mcast_recv/mcast_recv
+src/multicast/mcast_send/mcast_send
+src/tcp/tcp_echo_server/tcp_echo_server
+src/unix_domain/unix_client/unix_client
+src/unix_domain/unix_server/unix_server
 
 src/version.h
