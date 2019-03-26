@@ -106,7 +106,7 @@ McastRecv::run() {
     for (const auto& group : groups_) {
         const int sock = subscribe(group.ip, group.port);
         if (sock == -1) {
-            std::fprintf(stderr, "error: subscription failure: %s:%hu", group.ip.c_str(),
+            std::fprintf(stderr, "error: subscription failure: %s:%hu\n", group.ip.c_str(),
                 group.port);
             return -1;
         }
@@ -121,7 +121,7 @@ McastRecv::run() {
     while (true) {
         const int rv = ::ppoll(fds.data(), fds.size(), nullptr, nullptr);
         if (rv == -1) {
-            std::fprintf(stderr, "error: ppoll: %s", std::strerror(errno));
+            std::fprintf(stderr, "error: ppoll: %s\n", std::strerror(errno));
             return 1;
         }
         if (rv == 0)
