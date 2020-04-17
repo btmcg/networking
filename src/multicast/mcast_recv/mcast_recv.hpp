@@ -22,14 +22,14 @@ struct MulticastGroup
 class McastRecv final
 {
 public:
-    explicit McastRecv(const Config&);
+    explicit McastRecv(Config const&);
     int run();
 
 private:
     int subscribe(std::string_view ip, std::uint16_t port);
 
 private:
-    const Config& cfg_;
+    Config const& cfg_;
     std::string interface_ip_;
     std::vector<MulticastGroup> groups_;
 };

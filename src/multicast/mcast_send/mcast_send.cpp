@@ -42,9 +42,7 @@ McastSend::McastSend(Config const& cfg)
     // Convert/validate all requested groups
     groups_.reserve(cfg_.groups.size());
     for (auto const& g : cfg_.groups) {
-        std::string ip;
-        std::uint16_t port;
-        std::tie(ip, port) = net::parse_ip_port(g);
+        auto [ip, port] = net::parse_ip_port(g);
         if (ip.empty() || port == 0)
             throw std::runtime_error("invalid group: " + g);
         groups_.emplace_back(MulticastGroup{-1, ip, port});
@@ -83,7 +81,7 @@ McastSend::run()
         addr.sin_port = htobe16(group.port);
         addr.sin_addr.s_addr = ::inet_addr(group.ip.c_str());
 
-        ssize_t const nbytes = ::sendto(group.sock, cfg_.text.c_str(), cfg_.text.size(),
+        ::ssize_t const nbytes = ::sendto(group.sock, cfg_.text.c_str(), cfg_.text.size(),
                 /*flag=*/0, reinterpret_cast<sockaddr*>(&addr), sizeof(addr));
         if (nbytes == -1) {
             std::fprintf(stderr, "error: sendto: %s\n", std::strerror(errno));

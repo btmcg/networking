@@ -42,7 +42,7 @@ main(int, char**)
         }
 
         char buf[1024];
-        ssize_t nbytes = 0;
+        ::ssize_t nbytes = 0;
         do {
             nbytes = ::read(sockfd, buf, sizeof(buf));
             std::printf("read %zd bytes: [%.*s]\n", nbytes, static_cast<int>(nbytes), buf);

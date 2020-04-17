@@ -22,11 +22,11 @@ struct MulticastGroup
 class McastSend final
 {
 public:
-    explicit McastSend(const Config&);
+    explicit McastSend(Config const&);
     int run();
 
 private:
-    const Config& cfg_;
+    Config const& cfg_;
     std::vector<MulticastGroup> groups_;
     std::string interface_ip_;
 };

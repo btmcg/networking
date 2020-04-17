@@ -27,7 +27,7 @@ main(int, char**)
     }
 
     char buf[1024];
-    ssize_t rbytes = 0;
+    ::ssize_t rbytes = 0;
     do {
         rbytes = ::read(STDIN_FILENO, buf, sizeof(buf));
         ssize_t wbytes = ::write(fd, buf, static_cast<std::size_t>(rbytes));

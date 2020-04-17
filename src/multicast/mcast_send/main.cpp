@@ -30,7 +30,7 @@ namespace
         char const* app = ::basename(argv[0]);
         if (argc == 1) {
             std::printf("%s: missing required argument(s)\n\n", app);
-            ::usage(stderr, ::basename(app));
+            usage(stderr, ::basename(app));
         }
 
         while (true) {
@@ -46,7 +46,7 @@ namespace
 
             switch (c) {
                 case 'h':
-                    ::usage(stdout, ::basename(argv[0]));
+                    usage(stdout, ::basename(argv[0]));
                     break;
 
                 case 'i':
@@ -58,7 +58,7 @@ namespace
                     break;
 
                 default:
-                    ::usage(stderr, ::basename(argv[0]));
+                    usage(stderr, ::basename(argv[0]));
                     break;
             }
         }

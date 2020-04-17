@@ -44,9 +44,7 @@ McastRecv::McastRecv(Config const& cfg)
     // Convert/validate all requested groups
     groups_.reserve(cfg_.groups.size());
     for (auto const& g : cfg_.groups) {
-        std::string ip;
-        std::uint16_t port;
-        std::tie(ip, port) = net::parse_ip_port(g);
+        auto [ip, port] = net::parse_ip_port(g);
         if (ip.empty() || port == 0)
             throw std::runtime_error("invalid group: " + g);
         groups_.emplace_back(MulticastGroup{-1, ip, port});
@@ -133,7 +131,7 @@ McastRecv::run()
             if (fd.revents == 0)
                 continue;
 
-            ssize_t const nbytes
+            ::ssize_t const nbytes
                     = ::recvfrom(fd.fd, &buf, sizeof(buf), /*flags=*/0, nullptr, nullptr);
             if (nbytes == -1) {
                 std::fprintf(stderr, "error: recvfrom: %s\n", std::strerror(errno));

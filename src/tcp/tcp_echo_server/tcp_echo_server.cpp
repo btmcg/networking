@@ -2,16 +2,16 @@
 #include <algorithm>
 #undef NDEBUG
 #include <fcntl.h>
-#include <netdb.h> // for ::getaddrinfo
+#include <netdb.h> // ::getaddrinfo
 #include <sys/epoll.h>
-#include <sys/socket.h> // for socket calls
-#include <sys/types.h> // for addrinfo
-#include <unistd.h> // for ::close
+#include <sys/socket.h> // socket calls
+#include <sys/types.h> // addrinfo
+#include <unistd.h> // ::close
 #include <cassert>
 #include <cerrno>
-#include <cstring> // for std::memset, ::strerror
+#include <cstring> // std::memset, std::strerror
 #include <iostream>
-#include <stdexcept> // for std::runtime_error
+#include <stdexcept> // std::runtime_error
 #include <string>
 
 
