@@ -1,16 +1,16 @@
-#include <sys/socket.h> // for ::connect, ::socket
-#include <sys/un.h> // for sockaddr_un
-#include <unistd.h> // for ::read, ::write
-#include <cerrno> // for errno
-#include <cstdio> // for std::fprintf, std::printf
-#include <cstring> // for std::strerror, std::strncpy
+#include <sys/socket.h> // ::connect, ::socket
+#include <sys/un.h> // sockaddr_un
+#include <unistd.h> // ::read, ::write
+#include <cerrno> // errno
+#include <cstdio> // std::fprintf, std::printf
+#include <cstring> // std::strerror, std::strncpy
 
-const char* socket_path = "\0socket";
+char const* socket_path = "\0socket";
 
 int
 main(int, char**)
 {
-    const int fd = ::socket(AF_UNIX, SOCK_STREAM, /*protocol=*/0);
+    int const fd = ::socket(AF_UNIX, SOCK_STREAM, /*protocol=*/0);
     if (fd == -1) {
         std::fprintf(stderr, "[error] socket: %s", std::strerror(errno));
         return 1;

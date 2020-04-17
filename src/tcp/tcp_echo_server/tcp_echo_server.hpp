@@ -13,8 +13,8 @@ public:
     ~TcpEchoServer();
 
     // No copies
-    TcpEchoServer(const TcpEchoServer&) = delete;
-    TcpEchoServer& operator=(const TcpEchoServer&) = delete;
+    TcpEchoServer(TcpEchoServer const&) = delete;
+    TcpEchoServer& operator=(TcpEchoServer const&) = delete;
 
     /// Start the server and begin listening on socket.
     /// \return \c false on error

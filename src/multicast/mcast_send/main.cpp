@@ -1,15 +1,15 @@
-#include "mcast_send.h"
+#include "mcast_send.hpp"
 #include <getopt.h>
 #include <cstdio>
-#include <cstdlib> // for ::exit
-#include <cstring> // for ::basename
+#include <cstdlib> // std::exit
+#include <cstring> // ::basename
 #include <string>
 
 namespace
 { // anonymous
 
     void
-    usage(FILE* f, const char* app)
+    usage(FILE* f, char const* app)
     {
         std::fprintf(
                 f, "usage: %s [-h] [-i <interface>] [-t <text>] <group> [[<group>] ...]\n", app);
@@ -20,14 +20,14 @@ namespace
                 "   -h, --help          show this help message and exit\n"
                 "   -i, --interface     network interface name (e.g. eno1, lo)\n"
                 "   -t, --text          text to send\n");
-        ::exit(f == stderr ? 1 : 0);
+        std::exit(f == stderr ? 1 : 0);
     }
 
     Config
     arg_parse(int argc, char* argv[])
     {
         Config cfg;
-        const char* app = ::basename(argv[0]);
+        char const* app = ::basename(argv[0]);
         if (argc == 1) {
             std::printf("%s: missing required argument(s)\n\n", app);
             ::usage(stderr, ::basename(app));
@@ -40,7 +40,7 @@ namespace
                     {"text", required_argument, nullptr, 't'},
                     {nullptr, 0, nullptr, 0},
             };
-            const int c = ::getopt_long(argc, argv, "hi:t:", long_options, nullptr);
+            int const c = ::getopt_long(argc, argv, "hi:t:", long_options, nullptr);
             if (c == -1)
                 break;
 
@@ -75,7 +75,7 @@ namespace
 int
 main(int argc, char* argv[])
 {
-    const Config cfg = arg_parse(argc, argv);
+    Config const cfg = arg_parse(argc, argv);
     if (cfg.groups.empty()) {
         std::fprintf(stderr, "error: must provide at least one multicast group\n");
         return 1;
@@ -84,7 +84,7 @@ main(int argc, char* argv[])
     try {
         McastSend app(cfg);
         return app.run();
-    } catch (const std::exception& e) {
+    } catch (std::exception const& e) {
         std::fprintf(stderr, "error: %s\n", e.what());
         return 1;
     }

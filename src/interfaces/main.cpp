@@ -1,24 +1,24 @@
-#include "util/net_util.h"
-#include <cinttypes> // for PRI identifiers
-#include <cstdio> // for std::fprintf, std::printf
+#include "util/net_util.hpp"
+#include <cinttypes> // PRI identifiers
+#include <cstdio> // std::printf
 #include <vector>
 
 int
 main(int, char**)
 {
-    const std::vector<net::Interface> interfaces = net::get_interfaces();
+    std::vector<net::Interface> const interfaces = net::get_interfaces();
 
     std::printf("Number of interfaces: %zu\n", interfaces.size());
-    for (const auto& i : interfaces) {
+    for (auto const& i : interfaces) {
         std::printf("%s\n    flags: 0x%x\n", i.name.c_str(), i.flags);
         std::printf("    families: ");
-        for (const auto& f : i.families) {
+        for (auto const& f : i.families) {
             std::printf("%s,", net::family_to_string(f));
         }
         std::printf("\n");
-        for (const auto& a : i.addresses) {
-            const std::string& address = std::get<0>(a);
-            const std::string& service = std::get<1>(a);
+        for (auto const& a : i.addresses) {
+            std::string const& address = std::get<0>(a);
+            std::string const& service = std::get<1>(a);
             if (!address.empty())
                 std::printf("    address: %s, service=%s\n", address.c_str(), service.c_str());
         }

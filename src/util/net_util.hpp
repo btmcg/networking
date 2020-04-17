@@ -1,6 +1,6 @@
 #pragma once
 
-#include <linux/if_link.h> // for rtnl_link_stats
+#include <linux/if_link.h> // rtnl_link_stats
 #include <cstdint>
 #include <string>
 #include <string_view>
@@ -22,11 +22,11 @@ namespace net
     std::vector<Interface> get_interfaces();
 
     /// \returns Empty string if unknown family
-    const char* family_to_string(int family);
+    char const* family_to_string(int family);
 
     /// Parses string of form "ip:port"
     /// \returns Tuple of {empty string, 0} if invalid format
-    std::tuple<std::string, std::uint16_t> parse_ip_port(const std::string&);
+    std::tuple<std::string, std::uint16_t> parse_ip_port(std::string const&);
 
     /// Resolve interface name to ip
     /// \returns Empty string if invalid interface

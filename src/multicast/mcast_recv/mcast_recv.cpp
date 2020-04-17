@@ -1,33 +1,32 @@
-#include "mcast_recv.h"
-#include "util/net_util.h"
+#include "mcast_recv.hpp"
+#include "util/net_util.hpp"
 #include <arpa/inet.h>
 #include <endian.h>
 #include <getopt.h>
 #include <net/if.h> // IFNAMSIZ
 #include <netinet/in.h>
 #include <poll.h>
-#include <sys/ioctl.h> // for ::ioctl
-#include <sys/socket.h> // for ::recvmsg, ::setsockopt, ::socket
+#include <sys/ioctl.h> // ::ioctl
+#include <sys/socket.h> // ::recvmsg, ::setsockopt, ::socket
 #include <sys/types.h>
-#include <unistd.h> // for ::close
+#include <unistd.h> // ::close
 #include <cerrno>
 #include <cstdint>
 #include <cstdio>
-#include <cstdlib> // for ::exit
-#include <cstring> // for ::basename, std::strerror, std::strncpy
-#include <stdexcept> // for std::runtime_error
+#include <cstring> // ::basename, std::strerror, std::strncpy
+#include <stdexcept> // std::runtime_error
 #include <string>
 #include <string_view>
 #include <tuple>
 
 
-McastRecv::McastRecv(const Config& cfg)
+McastRecv::McastRecv(Config const& cfg)
         : cfg_(cfg)
         , interface_ip_()
         , groups_()
 {
     // Need a socket to get interface ip from name
-    const int tmp_sock = ::socket(AF_INET, SOCK_DGRAM, 0);
+    int const tmp_sock = ::socket(AF_INET, SOCK_DGRAM, 0);
     if (tmp_sock == -1)
         throw std::runtime_error(std::string("socket: ") + std::strerror(errno));
 
@@ -35,7 +34,7 @@ McastRecv::McastRecv(const Config& cfg)
     ifreq req = {};
     req.ifr_addr.sa_family = AF_INET;
     std::strncpy(req.ifr_name, cfg_.interface_name.c_str(), IFNAMSIZ - 1);
-    const int rv = ::ioctl(tmp_sock, SIOCGIFADDR, &req);
+    int const rv = ::ioctl(tmp_sock, SIOCGIFADDR, &req);
     if (rv == -1)
         throw std::runtime_error(std::string("ioctl(SIOCGIFADDR): ") + std::strerror(errno));
 
@@ -44,7 +43,7 @@ McastRecv::McastRecv(const Config& cfg)
 
     // Convert/validate all requested groups
     groups_.reserve(cfg_.groups.size());
-    for (const auto& g : cfg_.groups) {
+    for (auto const& g : cfg_.groups) {
         std::string ip;
         std::uint16_t port;
         std::tie(ip, port) = net::parse_ip_port(g);
@@ -61,14 +60,14 @@ McastRecv::McastRecv(const Config& cfg)
 int
 McastRecv::subscribe(std::string_view ip, std::uint16_t port)
 {
-    const int sock = ::socket(AF_INET, SOCK_DGRAM, 0);
+    int const sock = ::socket(AF_INET, SOCK_DGRAM, 0);
     if (sock == -1) {
         std::fprintf(stderr, "error: socket: %s\n", std::strerror(errno));
         return -1;
     }
 
     // Allow re-use of port
-    const int yes = 1;
+    int const yes = 1;
     int rv = ::setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
     if (rv == -1) {
         std::fprintf(stderr, "error: setsockopt(SO_REUSEADDR): %s\n", std::strerror(errno));
@@ -105,8 +104,8 @@ McastRecv::run()
 {
     std::vector<pollfd> fds;
 
-    for (const auto& group : groups_) {
-        const int sock = subscribe(group.ip, group.port);
+    for (auto const& group : groups_) {
+        int const sock = subscribe(group.ip, group.port);
         if (sock == -1) {
             std::fprintf(
                     stderr, "error: subscription failure: %s:%hu\n", group.ip.c_str(), group.port);
@@ -121,7 +120,7 @@ McastRecv::run()
     }
 
     while (true) {
-        const int rv = ::ppoll(fds.data(), fds.size(), nullptr, nullptr);
+        int const rv = ::ppoll(fds.data(), fds.size(), nullptr, nullptr);
         if (rv == -1) {
             std::fprintf(stderr, "error: ppoll: %s\n", std::strerror(errno));
             return 1;
@@ -130,11 +129,11 @@ McastRecv::run()
             continue;
 
         char buf[4096];
-        for (const pollfd& fd : fds) {
+        for (pollfd const& fd : fds) {
             if (fd.revents == 0)
                 continue;
 
-            const ssize_t nbytes
+            ssize_t const nbytes
                     = ::recvfrom(fd.fd, &buf, sizeof(buf), /*flags=*/0, nullptr, nullptr);
             if (nbytes == -1) {
                 std::fprintf(stderr, "error: recvfrom: %s\n", std::strerror(errno));

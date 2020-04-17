@@ -54,7 +54,7 @@ TcpEchoServer::TcpEchoServer()
     ::freeaddrinfo(result);
 
     // Allow for socket reuse
-    const int yes = 1;
+    int const yes = 1;
     status = ::setsockopt(sockfd_, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
     if (status == -1) {
         throw std::runtime_error(std::string("setsockopt (SO_REUSEADDR): ") + std::strerror(errno));
@@ -113,7 +113,7 @@ TcpEchoServer::run()
 
     epoll_event events[EpollMaxEvents];
     for (;;) {
-        const int num_events = ::epoll_wait(epollfd_, events, EpollMaxEvents, EpollTimeoutMsecs);
+        int const num_events = ::epoll_wait(epollfd_, events, EpollMaxEvents, EpollTimeoutMsecs);
         if (num_events == -1) {
             std::cerr << "epoll_wait: " << std::strerror(errno) << std::endl;
             return false;
@@ -134,11 +134,11 @@ TcpEchoServer::run()
             }
 
             if (events[i].data.fd == sockfd_) {
-                const bool status = on_incoming_connection(events[i].data.fd);
+                bool const status = on_incoming_connection(events[i].data.fd);
                 if (!status)
                     return false;
             } else {
-                const bool status = on_incoming_data(events[i].data.fd);
+                bool const status = on_incoming_data(events[i].data.fd);
                 if (!status)
                     return false;
             }
@@ -155,7 +155,7 @@ TcpEchoServer::on_incoming_connection(int)
     // Accept the connection
     sockaddr_storage their_addr;
     socklen_t addr_size = sizeof(their_addr);
-    const int accepted_sock
+    int const accepted_sock
             = ::accept(sockfd_, reinterpret_cast<sockaddr*>(&their_addr), &addr_size);
     if (accepted_sock == -1) {
         if (errno == EAGAIN)
@@ -174,7 +174,7 @@ TcpEchoServer::on_incoming_connection(int)
     epoll_event event;
     event.events = (EPOLLIN | EPOLLET);
     event.data.fd = accepted_sock;
-    const int result = ::epoll_ctl(epollfd_, EPOLL_CTL_ADD, accepted_sock, &event);
+    int const result = ::epoll_ctl(epollfd_, EPOLL_CTL_ADD, accepted_sock, &event);
     if (result == -1) {
         std::cerr << "epoll_ctl (EPOLL_CTL_ADD): " << std::strerror(errno) << std::endl;
         return false;
@@ -189,7 +189,7 @@ TcpEchoServer::on_incoming_data(int fd)
 {
     char buf[1024];
 
-    const ::ssize_t bytes_recvd = ::recv(fd, &buf, sizeof(buf), 0);
+    ::ssize_t const bytes_recvd = ::recv(fd, &buf, sizeof(buf), 0);
     if (bytes_recvd == -1) {
         std::cerr << "recv: " << std::strerror(errno) << std::endl;
         return false;
@@ -207,7 +207,7 @@ TcpEchoServer::on_incoming_data(int fd)
         epoll_event event;
         event.events = (EPOLLIN | EPOLLET);
         event.data.fd = fd;
-        const int result = ::epoll_ctl(epollfd_, EPOLL_CTL_DEL, fd, &event);
+        int const result = ::epoll_ctl(epollfd_, EPOLL_CTL_DEL, fd, &event);
         if (result == -1) {
             std::cerr << "epoll_ctl (EPOLL_CTL_DEL): " << std::strerror(errno) << std::endl;
             return false;
@@ -218,7 +218,7 @@ TcpEchoServer::on_incoming_data(int fd)
     }
 
     // Echo
-    const ::ssize_t bytes_sent = ::send(fd, &buf, static_cast<std::size_t>(bytes_recvd), 0);
+    ::ssize_t const bytes_sent = ::send(fd, &buf, static_cast<std::size_t>(bytes_recvd), 0);
     if (bytes_sent == -1) {
         std::cerr << "send: " << std::strerror(errno) << std::endl;
         return false;

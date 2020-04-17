@@ -1,25 +1,25 @@
-#include "net_util.h"
+#include "net_util.hpp"
 #include <arpa/inet.h>
-#include <ifaddrs.h> // for ::freeifaddrs, ::getifaddrs
-#include <netdb.h> // for ::getnameinfo, NI_MAXHOST, NI_MAXSERV
+#include <ifaddrs.h> // ::freeifaddrs, ::getifaddrs
+#include <netdb.h> // ::getnameinfo, NI_MAXHOST, NI_MAXSERV
 #include <sys/socket.h>
-#include <sys/socket.h> // for ::getnameinfo
-#include <sys/types.h> // for ::freeifaddrs, ::getifaddrs
+#include <sys/socket.h> // ::getnameinfo
+#include <sys/types.h> // ::freeifaddrs, ::getifaddrs
 #include <unistd.h>
-#include <algorithm> // for std::transform
+#include <algorithm> // std::transform
 #include <cassert>
 #include <cerrno>
 #include <cstdint>
-#include <cstdio> // for std::fprintf, std::printf
+#include <cstdio> // std::fprintf, std::printf
 #include <cstdlib>
-#include <cstring> // for std::strerror, std::strlen
+#include <cstring> // std::strerror, std::strlen
 #include <set>
 #include <stdexcept>
 #include <unordered_map>
 
 namespace net
 {
-    const char*
+    char const*
     family_to_string(int family)
     {
         switch (family) {
@@ -48,7 +48,7 @@ namespace net
             if (i->ifa_addr == nullptr)
                 continue;
 
-            const std::string name = i->ifa_name;
+            std::string const name = i->ifa_name;
             map[name].name = name;
             assert(map[name].flags == 0);
             map[name].flags = i->ifa_flags;
@@ -88,16 +88,16 @@ namespace net
 
 
     std::tuple<std::string, std::uint16_t>
-    parse_ip_port(const std::string& ip_port)
+    parse_ip_port(std::string const& ip_port)
     {
         static auto error = std::make_tuple("", 0);
 
-        const std::string::size_type colon = ip_port.find_first_of(':');
+        std::string::size_type const colon = ip_port.find_first_of(':');
         if (colon == std::string::npos)
             return error;
 
-        const std::string ip = ip_port.substr(0, colon);
-        const std::string port = ip_port.substr(colon + 1);
+        std::string const ip = ip_port.substr(0, colon);
+        std::string const port = ip_port.substr(colon + 1);
 
         if (ip.empty() || port.empty())
             return error;
