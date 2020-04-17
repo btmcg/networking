@@ -22,7 +22,7 @@ BraceWrapping:
     AfterEnum: true
     AfterExternBlock: true
     AfterFunction: true
-    AfterNamespace: true
+    AfterNamespace: false
     AfterObjCDeclaration: false
     AfterStruct: true
     AfterUnion: true

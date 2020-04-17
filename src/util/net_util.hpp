@@ -7,8 +7,7 @@
 #include <tuple>
 #include <vector>
 
-namespace net
-{
+namespace net {
     struct Interface
     {
         std::string name;

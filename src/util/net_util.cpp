@@ -17,8 +17,7 @@
 #include <stdexcept>
 #include <unordered_map>
 
-namespace net
-{
+namespace net {
     char const*
     family_to_string(int family)
     {

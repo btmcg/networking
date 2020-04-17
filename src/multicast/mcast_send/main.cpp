@@ -5,8 +5,7 @@
 #include <cstring> // ::basename
 #include <string>
 
-namespace
-{ // anonymous
+namespace { // anonymous
 
     void
     usage(FILE* f, char const* app)
