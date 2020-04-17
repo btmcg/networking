@@ -1,13 +1,14 @@
-#include <cerrno> // for errno
-#include <cstdio> // for std::fprintf, std::printf
-#include <cstring> // for std::strerror, std::strncpy
 #include <sys/socket.h> // for ::connect, ::socket
 #include <sys/un.h> // for sockaddr_un
 #include <unistd.h> // for ::read, ::write
+#include <cerrno> // for errno
+#include <cstdio> // for std::fprintf, std::printf
+#include <cstring> // for std::strerror, std::strncpy
 
 const char* socket_path = "\0socket";
 
-int main(int, char**)
+int
+main(int, char**)
 {
     const int fd = ::socket(AF_UNIX, SOCK_STREAM, /*protocol=*/0);
     if (fd == -1) {
@@ -40,5 +41,5 @@ int main(int, char**)
         }
     } while (rbytes > 0);
 
-  return 0;
+    return 0;
 }

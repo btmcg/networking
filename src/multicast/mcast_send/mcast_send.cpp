@@ -1,15 +1,5 @@
 #include "mcast_send.h"
 #include "util/net_util.h"
-
-#include <cerrno>
-#include <cstdint>
-#include <cstdio>
-#include <cstdlib> // for ::exit
-#include <cstring> // for ::basename, std::strerror
-#include <stdexcept>
-#include <string>
-#include <tuple>
-
 #include <arpa/inet.h>
 #include <endian.h>
 #include <getopt.h>
@@ -19,12 +9,21 @@
 #include <sys/socket.h> // for ::recvmsg, ::setsockopt, ::socket
 #include <sys/types.h>
 #include <unistd.h> // for ::close
+#include <cerrno>
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib> // for ::exit
+#include <cstring> // for ::basename, std::strerror
+#include <stdexcept>
+#include <string>
+#include <tuple>
 
 
 McastSend::McastSend(const Config& cfg)
         : cfg_(cfg)
         , groups_()
-        , interface_ip_() {
+        , interface_ip_()
+{
     // Need a socket to get interface ip from name
     const int tmp_sock = ::socket(AF_INET, SOCK_DGRAM, 0);
     if (tmp_sock == -1)
@@ -44,7 +43,8 @@ McastSend::McastSend(const Config& cfg)
     // Convert/validate all requested groups
     groups_.reserve(cfg_.groups.size());
     for (const auto& g : cfg_.groups) {
-        std::string ip; std::uint16_t port;
+        std::string ip;
+        std::uint16_t port;
         std::tie(ip, port) = net::parse_ip_port(g);
         if (ip.empty() || port == 0)
             throw std::runtime_error("invalid group: " + g);
@@ -52,12 +52,13 @@ McastSend::McastSend(const Config& cfg)
     }
 
     interface_ip_ = ::inet_ntoa(reinterpret_cast<sockaddr_in*>(&req.ifr_addr)->sin_addr);
-    std::printf("sending on interface %s (%s)\n", cfg_.interface_name.c_str(),
-        interface_ip_.c_str());
+    std::printf(
+            "sending on interface %s (%s)\n", cfg_.interface_name.c_str(), interface_ip_.c_str());
 }
 
 int
-McastSend::run() {
+McastSend::run()
+{
     // Prep sockets and assign sending interface
     for (auto& group : groups_) {
         group.sock = ::socket(AF_INET, SOCK_DGRAM, 0);
@@ -84,7 +85,7 @@ McastSend::run() {
         addr.sin_addr.s_addr = ::inet_addr(group.ip.c_str());
 
         const ssize_t nbytes = ::sendto(group.sock, cfg_.text.c_str(), cfg_.text.size(),
-            /*flag=*/0, reinterpret_cast<sockaddr*>(&addr), sizeof(addr));
+                /*flag=*/0, reinterpret_cast<sockaddr*>(&addr), sizeof(addr));
         if (nbytes == -1) {
             std::fprintf(stderr, "error: sendto: %s\n", std::strerror(errno));
             return 1;

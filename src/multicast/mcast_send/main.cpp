@@ -5,24 +5,27 @@
 #include <cstring> // for ::basename
 #include <string>
 
-namespace { // anonymous
+namespace
+{ // anonymous
 
     void
-    usage(FILE* f, const char* app) {
-        std::fprintf(f, "usage: %s [-h] [-i <interface>] [-t <text>] <group> [[<group>] ...]\n",
-            app);
+    usage(FILE* f, const char* app)
+    {
+        std::fprintf(
+                f, "usage: %s [-h] [-i <interface>] [-t <text>] <group> [[<group>] ...]\n", app);
         std::fprintf(f,
-            "positional arguments:\n"
-            "   group               multicast group in the form 'ip:port'\n"
-            "optional arguments:\n"
-            "   -h, --help          show this help message and exit\n"
-            "   -i, --interface     network interface name (e.g. eno1, lo)\n"
-            "   -t, --text          text to send\n");
+                "positional arguments:\n"
+                "   group               multicast group in the form 'ip:port'\n"
+                "optional arguments:\n"
+                "   -h, --help          show this help message and exit\n"
+                "   -i, --interface     network interface name (e.g. eno1, lo)\n"
+                "   -t, --text          text to send\n");
         ::exit(f == stderr ? 1 : 0);
     }
 
     Config
-    arg_parse(int argc, char* argv[]) {
+    arg_parse(int argc, char* argv[])
+    {
         Config cfg;
         const char* app = ::basename(argv[0]);
         if (argc == 1) {
@@ -32,10 +35,10 @@ namespace { // anonymous
 
         while (true) {
             static option long_options[] = {
-                {"help", no_argument, nullptr, 'h'},
-                {"interface", required_argument, nullptr, 'i'},
-                {"text", required_argument, nullptr, 't'},
-                {nullptr, 0, nullptr, 0},
+                    {"help", no_argument, nullptr, 'h'},
+                    {"interface", required_argument, nullptr, 'i'},
+                    {"text", required_argument, nullptr, 't'},
+                    {nullptr, 0, nullptr, 0},
             };
             const int c = ::getopt_long(argc, argv, "hi:t:", long_options, nullptr);
             if (c == -1)
@@ -67,10 +70,11 @@ namespace { // anonymous
 
         return cfg;
     }
-} // namespace anonymous
+} // namespace
 
 int
-main(int argc, char* argv[]) {
+main(int argc, char* argv[])
+{
     const Config cfg = arg_parse(argc, argv);
     if (cfg.groups.empty()) {
         std::fprintf(stderr, "error: must provide at least one multicast group\n");
@@ -80,7 +84,7 @@ main(int argc, char* argv[]) {
     try {
         McastSend app(cfg);
         return app.run();
-    } catch(const std::exception& e) {
+    } catch (const std::exception& e) {
         std::fprintf(stderr, "error: %s\n", e.what());
         return 1;
     }

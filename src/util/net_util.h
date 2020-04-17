@@ -1,16 +1,16 @@
 #pragma once
 
+#include <linux/if_link.h> // for rtnl_link_stats
 #include <cstdint>
 #include <string>
 #include <string_view>
 #include <tuple>
 #include <vector>
 
-#include <linux/if_link.h> // for rtnl_link_stats
-
-namespace net {
-
-    struct Interface {
+namespace net
+{
+    struct Interface
+    {
         std::string name;
         std::uint32_t flags = 0;
         std::vector<std::int32_t> families;

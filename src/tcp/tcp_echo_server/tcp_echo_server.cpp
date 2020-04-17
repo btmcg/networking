@@ -19,7 +19,8 @@ TcpEchoServer::TcpEchoServer()
         : port_(42484)
         , sockfd_(-1)
         , epollfd_(-1)
-        , clients_() {
+        , clients_()
+{
     addrinfo hints;
 
     std::memset(&hints, 0, sizeof(hints));
@@ -78,7 +79,8 @@ TcpEchoServer::TcpEchoServer()
 }
 
 
-TcpEchoServer::~TcpEchoServer() {
+TcpEchoServer::~TcpEchoServer()
+{
     assert(::close(sockfd_) != -1);
     assert(::close(epollfd_) != -1);
 
@@ -88,7 +90,9 @@ TcpEchoServer::~TcpEchoServer() {
 }
 
 
-bool TcpEchoServer::run() {
+bool
+TcpEchoServer::run()
+{
     // Start listening
     int result = ::listen(sockfd_, ListenBacklog);
     if (result == -1) {
@@ -109,8 +113,7 @@ bool TcpEchoServer::run() {
 
     epoll_event events[EpollMaxEvents];
     for (;;) {
-        const int num_events =
-                ::epoll_wait(epollfd_, events, EpollMaxEvents, EpollTimeoutMsecs);
+        const int num_events = ::epoll_wait(epollfd_, events, EpollMaxEvents, EpollTimeoutMsecs);
         if (num_events == -1) {
             std::cerr << "epoll_wait: " << std::strerror(errno) << std::endl;
             return false;
@@ -132,10 +135,12 @@ bool TcpEchoServer::run() {
 
             if (events[i].data.fd == sockfd_) {
                 const bool status = on_incoming_connection(events[i].data.fd);
-                if (!status) return false;
+                if (!status)
+                    return false;
             } else {
                 const bool status = on_incoming_data(events[i].data.fd);
-                if (!status) return false;
+                if (!status)
+                    return false;
             }
         } // for each event
     }
@@ -144,14 +149,17 @@ bool TcpEchoServer::run() {
 }
 
 
-bool TcpEchoServer::on_incoming_connection(int) {
+bool
+TcpEchoServer::on_incoming_connection(int)
+{
     // Accept the connection
     sockaddr_storage their_addr;
     socklen_t addr_size = sizeof(their_addr);
-    const int accepted_sock =
-            ::accept(sockfd_, reinterpret_cast<sockaddr*>(&their_addr), &addr_size);
+    const int accepted_sock
+            = ::accept(sockfd_, reinterpret_cast<sockaddr*>(&their_addr), &addr_size);
     if (accepted_sock == -1) {
-        if (errno == EAGAIN) return true; // not an error
+        if (errno == EAGAIN)
+            return true; // not an error
 
         throw std::runtime_error(std::string("accept: ") + std::strerror(errno));
     }
@@ -176,7 +184,9 @@ bool TcpEchoServer::on_incoming_connection(int) {
 }
 
 
-bool TcpEchoServer::on_incoming_data(int fd) {
+bool
+TcpEchoServer::on_incoming_data(int fd)
+{
     char buf[1024];
 
     const ::ssize_t bytes_recvd = ::recv(fd, &buf, sizeof(buf), 0);

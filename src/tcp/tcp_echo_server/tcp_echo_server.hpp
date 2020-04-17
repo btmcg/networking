@@ -6,7 +6,8 @@
 /*  \class  TcpEchoServer
  *  \brief  FIXME
  */
-class TcpEchoServer {
+class TcpEchoServer
+{
 public:
     TcpEchoServer();
     ~TcpEchoServer();
@@ -29,7 +30,8 @@ private:
     bool on_incoming_data(int fd);
 
 private:
-    enum {
+    enum
+    {
         ListenBacklog = 10, ///< max num of pending connections
         EpollMaxEvents = 20, ///< max num of pending epoll events
         EpollTimeoutMsecs = 10, ///< num of milliseconds to block on epoll_wait

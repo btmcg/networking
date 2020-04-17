@@ -2,7 +2,9 @@
 #include <exception>
 #include <iostream>
 
-int main(int, char**) {
+int
+main(int, char**)
+{
     try {
         TcpEchoServer server;
         const bool status = server.run();
@@ -11,8 +13,7 @@ int main(int, char**) {
             std::cout << "{main} Server shutdown with an error" << std::endl;
             return 1;
         }
-    }
-    catch ( const std::exception& e ) {
+    } catch (const std::exception& e) {
         std::cerr << "{main} Caught exception: " << e.what() << std::endl;
         return 1;
     }

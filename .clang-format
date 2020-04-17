@@ -6,7 +6,7 @@ AlignEscapedNewlines: DontAlign
 AlignOperands: false
 AlignTrailingComments: false
 AllowAllParametersOfDeclarationOnNextLine: true
-AllowShortBlocksOnASingleLine: false
+AllowShortBlocksOnASingleLine: true
 AllowShortCaseLabelsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: None
 AllowShortIfStatementsOnASingleLine: false
@@ -16,8 +16,24 @@ AlwaysBreakBeforeMultilineStrings: false
 AlwaysBreakTemplateDeclarations: true
 BinPackArguments: true
 BinPackParameters: true
+BraceWrapping:
+    AfterClass: true
+    AfterControlStatement: false
+    AfterEnum: true
+    AfterExternBlock: true
+    AfterFunction: true
+    AfterNamespace: true
+    AfterObjCDeclaration: false
+    AfterStruct: true
+    AfterUnion: true
+    BeforeCatch: false
+    BeforeElse: false
+    IndentBraces: false
+    SplitEmptyFunction: false
+    SplitEmptyRecord: false
+    SplitEmptyNamespace: false
 BreakBeforeBinaryOperators: All
-BreakBeforeBraces: Attach
+BreakBeforeBraces: Custom
 BreakBeforeInheritanceComma: false
 BreakBeforeTernaryOperators: true
 BreakConstructorInitializers: BeforeComma
@@ -27,12 +43,12 @@ CommentPragmas: ''
 CompactNamespaces: false
 ConstructorInitializerAllOnOneLineOrOnePerLine: false
 ConstructorInitializerIndentWidth: 8
-ContinuationIndentWidth: 4
+ContinuationIndentWidth: 8
 Cpp11BracedListStyle: true
 DerivePointerAlignment: false
 DisableFormat: false
 FixNamespaceComments: true
-IncludeBlocks: Regroup
+IncludeBlocks: Merge
 
 # Ordering should be: main associated header, local dir, project, third party, c++, c
 IncludeCategories:

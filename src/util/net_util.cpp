@@ -1,4 +1,11 @@
 #include "net_util.h"
+#include <arpa/inet.h>
+#include <ifaddrs.h> // for ::freeifaddrs, ::getifaddrs
+#include <netdb.h> // for ::getnameinfo, NI_MAXHOST, NI_MAXSERV
+#include <sys/socket.h>
+#include <sys/socket.h> // for ::getnameinfo
+#include <sys/types.h> // for ::freeifaddrs, ::getifaddrs
+#include <unistd.h>
 #include <algorithm> // for std::transform
 #include <cassert>
 #include <cerrno>
@@ -10,28 +17,26 @@
 #include <stdexcept>
 #include <unordered_map>
 
-#include <arpa/inet.h>
-#include <ifaddrs.h> // for ::freeifaddrs, ::getifaddrs
-#include <netdb.h> // for ::getnameinfo, NI_MAXHOST, NI_MAXSERV
-#include <sys/socket.h>
-#include <sys/socket.h> // for ::getnameinfo
-#include <sys/types.h> // for ::freeifaddrs, ::getifaddrs
-#include <unistd.h>
-
-namespace net {
-
+namespace net
+{
     const char*
-    family_to_string(int family) {
+    family_to_string(int family)
+    {
         switch (family) {
-            case AF_PACKET: return "AF_PACKET";
-            case AF_INET: return "AF_INET";
-            case AF_INET6: return "AF_INET6";
-            default: return "";
+            case AF_PACKET:
+                return "AF_PACKET";
+            case AF_INET:
+                return "AF_INET";
+            case AF_INET6:
+                return "AF_INET6";
+            default:
+                return "";
         }
     }
 
     std::vector<Interface>
-    get_interfaces() {
+    get_interfaces()
+    {
         std::unordered_map<std::string, Interface> map;
 
         ifaddrs* ifs = nullptr;
@@ -40,7 +45,8 @@ namespace net {
             throw std::runtime_error(std::string("error: getifaddrs: ") + std::strerror(errno));
 
         for (ifaddrs* i = ifs; i != nullptr; i = i->ifa_next) {
-            if (i->ifa_addr == nullptr) continue;
+            if (i->ifa_addr == nullptr)
+                continue;
 
             const std::string name = i->ifa_name;
             map[name].name = name;
@@ -54,11 +60,11 @@ namespace net {
             char service[NI_MAXSERV] = {};
             if (i->ifa_addr->sa_family == AF_INET || i->ifa_addr->sa_family == AF_INET6) {
                 rv = ::getnameinfo(i->ifa_addr, sizeof(sockaddr_storage), host, sizeof(host),
-                    service, sizeof(service), NI_NUMERICHOST);
+                        service, sizeof(service), NI_NUMERICHOST);
                 if (rv != 0) {
                     ::freeifaddrs(ifs);
-                    throw std::runtime_error(std::string("error: getnameinfo: ")
-                        + ::gai_strerror(rv));
+                    throw std::runtime_error(
+                            std::string("error: getnameinfo: ") + ::gai_strerror(rv));
                 }
             }
 
@@ -76,13 +82,14 @@ namespace net {
         std::vector<Interface> vec;
         vec.reserve(map.size());
         std::transform(map.cbegin(), map.cend(), std::back_inserter(vec),
-                       [](auto &kv){ return kv.second; });
+                [](auto& kv) { return kv.second; });
         return vec;
     }
 
 
     std::tuple<std::string, std::uint16_t>
-    parse_ip_port(const std::string& ip_port) {
+    parse_ip_port(const std::string& ip_port)
+    {
         static auto error = std::make_tuple("", 0);
 
         const std::string::size_type colon = ip_port.find_first_of(':');
@@ -99,7 +106,8 @@ namespace net {
     }
 
     std::string
-    resolve_interface(std::string_view name) {
+    resolve_interface(std::string_view name)
+    {
         static std::string error;
 
         if (name.empty())
@@ -124,11 +132,11 @@ namespace net {
             char service[NI_MAXSERV] = {};
             if (i->ifa_addr->sa_family == AF_INET || i->ifa_addr->sa_family == AF_INET6) {
                 rv = ::getnameinfo(i->ifa_addr, sizeof(sockaddr_storage), host, sizeof(host),
-                    service, sizeof(service), NI_NUMERICHOST);
+                        service, sizeof(service), NI_NUMERICHOST);
                 if (rv != 0) {
                     ::freeifaddrs(ifs);
-                    throw std::runtime_error(std::string("error: getnameinfo: ")
-                        + ::gai_strerror(rv));
+                    throw std::runtime_error(
+                            std::string("error: getnameinfo: ") + ::gai_strerror(rv));
                 }
             }
 
