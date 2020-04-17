@@ -6,4 +6,4 @@ all: $(VERSION_FILE)
 
 $(VERSION_FILE): .git/HEAD .git/index
 	@echo "#pragma once" > $@
-	@echo "const char* VERSION = \"$(VERSION)\";" >> $@
+	@echo "constexpr char const* VERSION = \"$(VERSION)\";" >> $@
