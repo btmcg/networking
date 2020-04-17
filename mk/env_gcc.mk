@@ -11,6 +11,7 @@ CC_WARN  :=
 
 # c++-specific warning flags
 CXX_WARN := \
+  -Winline \
   -Wsuggest-override \
   -Wuseless-cast
 

@@ -11,7 +11,7 @@ include mk/version.mk
 # o Ensure that we have permission to write to APP_OUT, BIN_DIR, LIB_DIR
 #   before actually doing any work.
 # o Add documentation for all build targets.
-# o Add 'doc' and 'test' default targets.
+# o Add 'doc' default target.
 # o Support some sort of code gen, specifically where some other program
 #   generates .cpp and .h files.
 # o Document build system hierarchy:
@@ -25,7 +25,6 @@ include mk/version.mk
 #   - a subdirectory (under src/) that contains several modules
 #   - an executable several levels deep (e.g., src/a/b/c/d/e/Module.mk)
 # o Add support for make v3.81 and below
-# o Add support for OSX wackiness
 # o Add ability to clean just one module (e.g., make module clean)
 # o Split compile/link function into two distinct functions
 # o Support DESTDIR:
@@ -51,7 +50,7 @@ $(eval $(call build-rules,$(call get-all-modules)))
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 # necessary targets and phony targets
-.PHONY: all clean distclean list-modules $(call get-all-modules)
+.PHONY: all clean distclean list-modules tags $(call get-all-modules)
 
 all: $(call get-all-modules)
 
@@ -65,6 +64,12 @@ distclean: clean
 		$(RM) $(LIB_DIR)/* && $(RMDIR) $(LIB_DIR))
 	$(if $(wildcard $(BIN_DIR)),\
 		$(RM) $(BIN_DIR)/* && $(RMDIR) $(BIN_DIR))
+
+tags:
+	ctags --recurse src
+
+test: test-runner
+	./bin/$^
 
 list-modules:
 	$(list-modules)

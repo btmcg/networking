@@ -71,12 +71,12 @@ ifdef DEBUG
   OPTFLAGS := -O0 -fno-inline
   WARN += -Wno-error
 else
-  OPTFLAGS := -O3 -flto -DNDEBUG
+  OPTFLAGS := -O3 -DNDEBUG
 endif
 
 # compiler flags
 CPPFLAGS += -ggdb3 -fstrict-aliasing $(WARN) -MMD $(OPTFLAGS) -iquote src
-CXXFLAGS += -std=c++17 $(CXX_WARN)
+CXXFLAGS += -std=c++2a $(CXX_WARN)
 CFLAGS   += -std=c11 $(CC_WARN)
 
 # linker flags
