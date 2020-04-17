@@ -5,19 +5,22 @@
 #include <vector>
 
 
-struct Config {
+struct Config
+{
     std::string interface_name;
     std::vector<std::string> groups;
     std::string text;
 };
 
-struct MulticastGroup {
+struct MulticastGroup
+{
     int sock = -1;
     std::string ip = "";
     std::uint16_t port = 0;
 };
 
-class McastSend final {
+class McastSend final
+{
 public:
     explicit McastSend(const Config&);
     int run();

@@ -63,7 +63,7 @@ namespace // unnamed
 
         return cfg;
     }
-} // unnamed
+} // namespace
 
 int
 main(int argc, char* argv[])
