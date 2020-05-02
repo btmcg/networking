@@ -1,9 +1,13 @@
 # third party libs
 # ----------------------------------------------------------------------
 
-CATCH := third_party/catch/2.11.3
+CATCH := third_party/catch2/2.12.1/single_include
 use-catch =\
   $(eval LOCAL_CPPFLAGS += -isystem $(CATCH))
+
+FMT := third_party/fmt/6.2.0
+use-fmt =\
+  $(eval LOCAL_CPPFLAGS += -DFMT_HEADER_ONLY -isystem$(FMT)/include)
 
 ifeq ($(COMPILER),gcc)
   GOOGLE_BENCHMARK := third_party/google-benchmark-gcc/1.5.0

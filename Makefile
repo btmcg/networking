@@ -50,7 +50,7 @@ $(eval $(call build-rules,$(call get-all-modules)))
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 # necessary targets and phony targets
-.PHONY: all clean distclean list-modules tags $(call get-all-modules)
+.PHONY: all benchmark clean distclean format list-modules test tags $(call get-all-modules)
 
 all: $(call get-all-modules)
 
@@ -65,8 +65,16 @@ distclean: clean
 	$(if $(wildcard $(BIN_DIR)),\
 		$(RM) $(BIN_DIR)/* && $(RMDIR) $(BIN_DIR))
 
+format:
+	@find src -type f \( -name '*.hpp' -o -name '*.cpp' \) -exec clang-format -i --verbose {} \;
+	@find test -type f \( -name '*.hpp' -o -name '*.cpp' \) -exec clang-format -i --verbose {} \;
+	@find benchmark -type f \( -name '*.hpp' -o -name '*.cpp' \) -exec clang-format -i --verbose {} \;
+
 tags:
 	ctags --recurse src
+
+benchmark: benchmark-runner
+	./bin/$^
 
 test: test-runner
 	./bin/$^

@@ -66,6 +66,21 @@ CXX_WARN := \
   -Woverloaded-virtual \
   -Wzero-as-null-pointer-constant
 
+# sanitizer options
+ifdef ASAN
+  # ASAN_OPTIONS=check_initialization_order=1 bin/test-runner
+  CPPFLAGS = -fsanitize=address -fno-omit-frame-pointer
+endif
+
+ifdef MSAN
+  CPPFLAGS = -fsanitize=memory -fPIE -pie -fsanitize-memory-track-origins -fno-omit-frame-pointer -Wno-unused-command-line-argument
+endif
+
+ifdef UBSAN
+  # UBSAN_OPTIONS=print_stacktrace=1 bin/test-runner
+  CPPFLAGS = -fsanitize=undefined -fno-omit-frame-pointer
+endif
+
 # gcc optimization flags
 ifdef DEBUG
   OPTFLAGS := -O0 -fno-inline
