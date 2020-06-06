@@ -1,3 +1,1 @@
-LOCAL_PATH := $(call my-dir)
-
-$(call add-static-library-module)
+$(call add-static-library-module,$(call get-path))
