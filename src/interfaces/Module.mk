@@ -1,3 +1,3 @@
-LOCAL_LIBRARIES := util
+MODULE_LIBRARIES := util
 
 $(call add-executable-module,$(call get-path))
