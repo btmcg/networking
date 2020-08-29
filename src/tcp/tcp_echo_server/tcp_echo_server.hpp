@@ -32,15 +32,15 @@ private:
 private:
     enum
     {
-        ListenBacklog = 10, ///< max num of pending connections
-        EpollMaxEvents = 20, ///< max num of pending epoll events
+        ListenBacklog = 10,     ///< max num of pending connections
+        EpollMaxEvents = 20,    ///< max num of pending epoll events
         EpollTimeoutMsecs = 10, ///< num of milliseconds to block on epoll_wait
     };
 
 private:
-    int port_; ///< port to listen on
-    int sockfd_; ///< listening socket
-    int epollfd_; ///< epoll file descriptor
+    int port_;                 ///< port to listen on
+    int sockfd_;               ///< listening socket
+    int epollfd_;              ///< epoll file descriptor
     std::vector<int> clients_; ///< list of client connected sockets
 
 }; // class TcpEchoServer

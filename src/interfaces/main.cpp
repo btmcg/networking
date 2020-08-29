@@ -1,6 +1,6 @@
 #include "util/net_util.hpp"
 #include <cinttypes> // PRI identifiers
-#include <cstdio> // std::printf
+#include <cstdio>    // std::printf
 #include <vector>
 
 int

@@ -1,10 +1,10 @@
 #include "net_util.hpp"
 #include <arpa/inet.h>
 #include <ifaddrs.h> // ::freeifaddrs, ::getifaddrs
-#include <netdb.h> // ::getnameinfo, NI_MAXHOST, NI_MAXSERV
+#include <netdb.h>   // ::getnameinfo, NI_MAXHOST, NI_MAXSERV
 #include <sys/socket.h>
 #include <sys/socket.h> // ::getnameinfo
-#include <sys/types.h> // ::freeifaddrs, ::getifaddrs
+#include <sys/types.h>  // ::freeifaddrs, ::getifaddrs
 #include <unistd.h>
 #include <algorithm> // std::transform
 #include <cassert>

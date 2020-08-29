@@ -5,8 +5,8 @@
 #include <netdb.h> // ::getaddrinfo
 #include <sys/epoll.h>
 #include <sys/socket.h> // socket calls
-#include <sys/types.h> // addrinfo
-#include <unistd.h> // ::close
+#include <sys/types.h>  // addrinfo
+#include <unistd.h>     // ::close
 #include <cassert>
 #include <cerrno>
 #include <cstring> // std::memset, std::strerror
@@ -24,9 +24,9 @@ TcpEchoServer::TcpEchoServer()
     addrinfo hints;
 
     std::memset(&hints, 0, sizeof(hints));
-    hints.ai_family = AF_UNSPEC; // ipv4 or ipv6
+    hints.ai_family = AF_UNSPEC;     // ipv4 or ipv6
     hints.ai_socktype = SOCK_STREAM; // tcp
-    hints.ai_flags = AI_PASSIVE; // wildcard ip
+    hints.ai_flags = AI_PASSIVE;     // wildcard ip
     hints.ai_protocol = 0;
     hints.ai_canonname = nullptr;
     hints.ai_addr = nullptr;

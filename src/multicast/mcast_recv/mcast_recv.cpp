@@ -6,14 +6,14 @@
 #include <net/if.h> // IFNAMSIZ
 #include <netinet/in.h>
 #include <poll.h>
-#include <sys/ioctl.h> // ::ioctl
+#include <sys/ioctl.h>  // ::ioctl
 #include <sys/socket.h> // ::recvmsg, ::setsockopt, ::socket
 #include <sys/types.h>
 #include <unistd.h> // ::close
 #include <cerrno>
 #include <cstdint>
 #include <cstdio>
-#include <cstring> // ::basename, std::strerror, std::strncpy
+#include <cstring>   // ::basename, std::strerror, std::strncpy
 #include <stdexcept> // std::runtime_error
 #include <string>
 #include <string_view>

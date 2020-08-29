@@ -1,9 +1,9 @@
 #include <sys/socket.h> // ::connect, ::socket
-#include <sys/un.h> // sockaddr_un
-#include <unistd.h> // ::read, ::write
-#include <cerrno> // errno
-#include <cstdio> // std::fprintf, std::printf
-#include <cstring> // std::strerror, std::strncpy
+#include <sys/un.h>     // sockaddr_un
+#include <unistd.h>     // ::read, ::write
+#include <cerrno>       // errno
+#include <cstdio>       // std::fprintf, std::printf
+#include <cstring>      // std::strerror, std::strncpy
 
 char const* socket_path = "\0socket";
 
