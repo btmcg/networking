@@ -6,6 +6,8 @@ lib/
 *.o
 *.so
 
+tags
+
 src/interfaces/interfaces
 src/multicast/mcast_recv/mcast_recv
 src/multicast/mcast_send/mcast_send

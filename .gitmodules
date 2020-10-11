@@ -4,3 +4,6 @@
 [submodule "third_party/fmt/7.0.0"]
 	path = third_party/fmt/7.0.0
 	url = https://github.com/fmtlib/fmt.git
+[submodule "third_party/fmt/7.0.3"]
+	path = third_party/fmt/7.0.3
+	url = https://github.com/fmtlib/fmt.git
