@@ -1,22 +1,24 @@
 #include "tcp_echo_server.hpp"
+#include <cstdio> // std::fprintf
 #include <exception>
-#include <iostream>
+
 
 int
 main(int, char**)
 {
     try {
         tcp_echo_server server;
-        bool const status = server.run();
-
-        if (!status) {
-            std::cout << "{main} Server shutdown with an error" << std::endl;
-            return 1;
+        if (!server.run()) {
+            std::fprintf(stderr, "error: server shutdown with an error\n");
+            return EXIT_FAILURE;
         }
     } catch (std::exception const& e) {
-        std::cerr << "{main} Caught exception: " << e.what() << std::endl;
-        return 1;
+        std::fprintf(stderr, "error: exception: %s\n", e.what());
+        return EXIT_FAILURE;
+    } catch (...) {
+        std::fprintf(stderr, "error: exception: ???\n");
+        return EXIT_FAILURE;
     }
 
-    return 0;
+    return EXIT_SUCCESS;
 }
