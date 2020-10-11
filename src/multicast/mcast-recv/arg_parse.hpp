@@ -28,7 +28,7 @@ arg_parse(int argc, char** argv)
                 "  group                    multicast group in the for 'ip:port'\n"
                 "optional arguments:\n"
                 "  -h, --help               this output\n"
-                "  -i, --interface          network interface name (e.g., eno1, lo)\n"
+                "  -i, --interface=<name>   network interface name (e.g., eno1, lo)\n"
                 "  -v, --version            version\n",
                 app.c_str());
         std::exit(outerr == stdout ? EXIT_SUCCESS : EXIT_FAILURE);
