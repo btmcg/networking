@@ -9,10 +9,10 @@ lib/
 tags
 
 src/interfaces/interfaces
-src/multicast/mcast_recv/mcast_recv
-src/multicast/mcast_send/mcast_send
-src/tcp/tcp_echo_server/tcp_echo_server
-src/unix_domain/unix_client/unix_client
-src/unix_domain/unix_server/unix_server
+src/multicast/mcast-recv/mcast-recv
+src/multicast/mcast-send/mcast-send
+src/tcp/tcp-echo-server/tcp-echo-server
+src/unix_domain/unix-client/unix-client
+src/unix_domain/unix-server/unix-server
 
 src/version.h
