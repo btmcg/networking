@@ -6,7 +6,7 @@ int
 main(int, char**)
 {
     try {
-        TcpEchoServer server;
+        tcp_echo_server server;
         bool const status = server.run();
 
         if (!status) {

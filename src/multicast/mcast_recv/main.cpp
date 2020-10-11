@@ -21,10 +21,10 @@ namespace // unnamed
         std::exit(f == stderr ? 1 : 0);
     }
 
-    Config
+    config
     arg_parse(int argc, char* argv[])
     {
-        Config cfg;
+        config cfg;
         char const* app = ::basename(argv[0]);
         if (argc == 1) {
             std::printf("%s: missing required argument(s)\n", app);
@@ -32,12 +32,13 @@ namespace // unnamed
         }
 
         while (true) {
-            static option long_options[] = {
+            static constexpr option long_options[] = {
                     {"help", no_argument, nullptr, 'h'},
                     {"interface", required_argument, nullptr, 'i'},
                     {nullptr, 0, nullptr, 0},
             };
-            int const c = ::getopt_long(argc, argv, "hi:", long_options, nullptr);
+            int const c = ::getopt_long(
+                    argc, argv, "hi:", static_cast<option const*>(long_options), nullptr);
             if (c == -1)
                 break;
 
@@ -68,14 +69,14 @@ namespace // unnamed
 int
 main(int argc, char* argv[])
 {
-    Config const cfg = arg_parse(argc, argv);
+    config const cfg = arg_parse(argc, argv);
     if (cfg.groups.empty()) {
         std::fprintf(stderr, "error: must provide at least on multicast group\n");
         return 1;
     }
 
     try {
-        McastRecv app(cfg);
+        mcast_recv app(cfg);
         return app.run();
     } catch (std::exception const& e) {
         std::fprintf(stderr, "error: %s\n", e.what());

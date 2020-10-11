@@ -6,7 +6,7 @@
 int
 main(int, char**)
 {
-    std::vector<net::Interface> const interfaces = net::get_interfaces();
+    std::vector<net::interface> const interfaces = net::get_interfaces();
 
     std::printf("Number of interfaces: %zu\n", interfaces.size());
     for (auto const& i : interfaces) {

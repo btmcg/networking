@@ -6,15 +6,15 @@
 /*  \class  TcpEchoServer
  *  \brief  FIXME
  */
-class TcpEchoServer
+class tcp_echo_server
 {
 public:
-    TcpEchoServer();
-    ~TcpEchoServer();
+    tcp_echo_server();
+    ~tcp_echo_server();
 
     // No copies
-    TcpEchoServer(TcpEchoServer const&) = delete;
-    TcpEchoServer& operator=(TcpEchoServer const&) = delete;
+    tcp_echo_server(tcp_echo_server const&) = delete;
+    tcp_echo_server& operator=(tcp_echo_server const&) = delete;
 
     /// Start the server and begin listening on socket.
     /// \return \c false on error
@@ -38,9 +38,9 @@ private:
     };
 
 private:
-    int port_;                 ///< port to listen on
-    int sockfd_;               ///< listening socket
-    int epollfd_;              ///< epoll file descriptor
+    int port_{42484};          ///< port to listen on
+    int sockfd_{-1};           ///< listening socket
+    int epollfd_{-1};          ///< epoll file descriptor
     std::vector<int> clients_; ///< list of client connected sockets
 
 }; // class TcpEchoServer

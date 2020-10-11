@@ -33,10 +33,10 @@ namespace net {
         }
     }
 
-    std::vector<Interface>
+    std::vector<interface>
     get_interfaces()
     {
-        std::unordered_map<std::string, Interface> map;
+        std::unordered_map<std::string, interface> map;
 
         ifaddrs* ifs = nullptr;
         int rv = ::getifaddrs(&ifs);
@@ -78,7 +78,7 @@ namespace net {
         ::freeifaddrs(ifs);
 
         // Copy map into vector
-        std::vector<Interface> vec;
+        std::vector<interface> vec;
         vec.reserve(map.size());
         std::transform(map.cbegin(), map.cend(), std::back_inserter(vec),
                 [](auto& kv) { return kv.second; });

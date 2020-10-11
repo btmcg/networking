@@ -15,13 +15,10 @@
 #include <string>
 
 
-TcpEchoServer::TcpEchoServer()
-        : port_(42484)
-        , sockfd_(-1)
-        , epollfd_(-1)
-        , clients_()
+tcp_echo_server::tcp_echo_server()
+        : clients_()
 {
-    addrinfo hints;
+    addrinfo hints{};
 
     std::memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_UNSPEC;     // ipv4 or ipv6
@@ -79,7 +76,7 @@ TcpEchoServer::TcpEchoServer()
 }
 
 
-TcpEchoServer::~TcpEchoServer()
+tcp_echo_server::~tcp_echo_server()
 {
     assert(::close(sockfd_) != -1);
     assert(::close(epollfd_) != -1);
@@ -91,7 +88,7 @@ TcpEchoServer::~TcpEchoServer()
 
 
 bool
-TcpEchoServer::run()
+tcp_echo_server::run()
 {
     // Start listening
     int result = ::listen(sockfd_, ListenBacklog);
@@ -102,7 +99,7 @@ TcpEchoServer::run()
     std::cout << "listening on port " << port_ << std::endl;
 
     // Add our listening socket to epoll.
-    epoll_event event;
+    epoll_event event{};
     event.data.fd = sockfd_;
     event.events = (EPOLLIN | EPOLLET);
     result = ::epoll_ctl(epollfd_, EPOLL_CTL_ADD, sockfd_, &event);
@@ -150,10 +147,10 @@ TcpEchoServer::run()
 
 
 bool
-TcpEchoServer::on_incoming_connection(int)
+tcp_echo_server::on_incoming_connection(int)
 {
     // Accept the connection
-    sockaddr_storage their_addr;
+    sockaddr_storage their_addr{};
     socklen_t addr_size = sizeof(their_addr);
     int const accepted_sock
             = ::accept(sockfd_, reinterpret_cast<sockaddr*>(&their_addr), &addr_size);
@@ -171,7 +168,7 @@ TcpEchoServer::on_incoming_connection(int)
     clients_.emplace_back(accepted_sock);
 
     // Add the new fd to epoll.
-    epoll_event event;
+    epoll_event event{};
     event.events = (EPOLLIN | EPOLLET);
     event.data.fd = accepted_sock;
     int const result = ::epoll_ctl(epollfd_, EPOLL_CTL_ADD, accepted_sock, &event);
@@ -185,7 +182,7 @@ TcpEchoServer::on_incoming_connection(int)
 
 
 bool
-TcpEchoServer::on_incoming_data(int fd)
+tcp_echo_server::on_incoming_data(int fd)
 {
     char buf[1024];
 
@@ -204,7 +201,7 @@ TcpEchoServer::on_incoming_data(int fd)
         assert(itr != clients_.end());
         clients_.erase(itr);
 
-        epoll_event event;
+        epoll_event event{};
         event.events = (EPOLLIN | EPOLLET);
         event.data.fd = fd;
         int const result = ::epoll_ctl(epollfd_, EPOLL_CTL_DEL, fd, &event);

@@ -18,7 +18,7 @@
 #include <tuple>
 
 
-McastSend::McastSend(Config const& cfg)
+mcast_send::mcast_send(config const& cfg)
         : cfg_(cfg)
         , groups_()
         , interface_ip_()
@@ -45,7 +45,7 @@ McastSend::McastSend(Config const& cfg)
         auto [ip, port] = net::parse_ip_port(g);
         if (ip.empty() || port == 0)
             throw std::runtime_error("invalid group: " + g);
-        groups_.emplace_back(MulticastGroup{-1, ip, port});
+        groups_.emplace_back(multicast_group{-1, ip, port});
     }
 
     interface_ip_ = ::inet_ntoa(reinterpret_cast<sockaddr_in*>(&req.ifr_addr)->sin_addr);
@@ -54,7 +54,7 @@ McastSend::McastSend(Config const& cfg)
 }
 
 int
-McastSend::run()
+mcast_send::run()
 {
     // Prep sockets and assign sending interface
     for (auto& group : groups_) {

@@ -6,30 +6,30 @@
 #include <vector>
 
 
-struct Config
+struct config
 {
     std::string interface_name;
     std::vector<std::string> groups;
 };
 
-struct MulticastGroup
+struct multicast_group
 {
     int sock = -1;
     std::string ip = "";
     std::uint16_t port = 0;
 };
 
-class McastRecv final
+class mcast_recv final
 {
 public:
-    explicit McastRecv(Config const&);
+    explicit mcast_recv(config const&);
     int run();
 
 private:
     int subscribe(std::string_view ip, std::uint16_t port);
 
 private:
-    Config const& cfg_;
+    config const& cfg_;
     std::string interface_ip_;
-    std::vector<MulticastGroup> groups_;
+    std::vector<multicast_group> groups_;
 };

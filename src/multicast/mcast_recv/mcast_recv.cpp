@@ -20,7 +20,7 @@
 #include <tuple>
 
 
-McastRecv::McastRecv(Config const& cfg)
+mcast_recv::mcast_recv(config const& cfg)
         : cfg_(cfg)
         , interface_ip_()
         , groups_()
@@ -47,7 +47,7 @@ McastRecv::McastRecv(Config const& cfg)
         auto [ip, port] = net::parse_ip_port(g);
         if (ip.empty() || port == 0)
             throw std::runtime_error("invalid group: " + g);
-        groups_.emplace_back(MulticastGroup{-1, ip, port});
+        groups_.emplace_back(multicast_group{-1, ip, port});
     }
 
     interface_ip_ = ::inet_ntoa(reinterpret_cast<sockaddr_in*>(&req.ifr_addr)->sin_addr);
@@ -56,7 +56,7 @@ McastRecv::McastRecv(Config const& cfg)
 }
 
 int
-McastRecv::subscribe(std::string_view ip, std::uint16_t port)
+mcast_recv::subscribe(std::string_view ip, std::uint16_t port)
 {
     int const sock = ::socket(AF_INET, SOCK_DGRAM, 0);
     if (sock == -1) {
@@ -98,7 +98,7 @@ McastRecv::subscribe(std::string_view ip, std::uint16_t port)
 }
 
 int
-McastRecv::run()
+mcast_recv::run()
 {
     std::vector<pollfd> fds;
 
@@ -110,7 +110,7 @@ McastRecv::run()
             return -1;
         }
 
-        pollfd pfd;
+        pollfd pfd{};
         pfd.fd = sock;
         pfd.events = (POLLIN | POLLPRI | POLLERR | POLLHUP | POLLNVAL);
         pfd.revents = 0;

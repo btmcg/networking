@@ -8,17 +8,17 @@
 #include <vector>
 
 namespace net {
-    struct Interface
+    struct interface
     {
         std::string name;
         std::uint32_t flags = 0;
         std::vector<std::int32_t> families;
         std::vector<std::tuple<std::string, std::string>> addresses;
-        rtnl_link_stats stats;
+        rtnl_link_stats stats{};
     };
 
     /// \throws std::exception On unexpected error
-    std::vector<Interface> get_interfaces();
+    std::vector<interface> get_interfaces();
 
     /// \returns Empty string if unknown family
     char const* family_to_string(int family);

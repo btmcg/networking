@@ -33,7 +33,7 @@ main(int, char**)
     }
 
     while (true) {
-        sockaddr sa;
+        sockaddr sa{};
         socklen_t len = 0;
         int sockfd = ::accept(fd, &sa, &len);
         if (sockfd == -1) {

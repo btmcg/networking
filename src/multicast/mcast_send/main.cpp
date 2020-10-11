@@ -22,10 +22,10 @@ namespace { // anonymous
         std::exit(f == stderr ? 1 : 0);
     }
 
-    Config
+    config
     arg_parse(int argc, char* argv[])
     {
-        Config cfg;
+        config cfg;
         char const* app = ::basename(argv[0]);
         if (argc == 1) {
             std::printf("%s: missing required argument(s)\n\n", app);
@@ -74,14 +74,14 @@ namespace { // anonymous
 int
 main(int argc, char* argv[])
 {
-    Config const cfg = arg_parse(argc, argv);
+    config const cfg = arg_parse(argc, argv);
     if (cfg.groups.empty()) {
         std::fprintf(stderr, "error: must provide at least one multicast group\n");
         return 1;
     }
 
     try {
-        McastSend app(cfg);
+        mcast_send app(cfg);
         return app.run();
     } catch (std::exception const& e) {
         std::fprintf(stderr, "error: %s\n", e.what());
