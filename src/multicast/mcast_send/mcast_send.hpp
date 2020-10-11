@@ -5,13 +5,6 @@
 #include <vector>
 
 
-struct config
-{
-    std::string interface_name;
-    std::vector<std::string> groups;
-    std::string text;
-};
-
 struct multicast_group
 {
     int sock = -1;
@@ -22,11 +15,12 @@ struct multicast_group
 class mcast_send final
 {
 public:
-    explicit mcast_send(config const&);
+    mcast_send(std::string const& interface_name, std::vector<std::string> const& groups,
+            std::string text);
     int run();
 
 private:
-    config const& cfg_;
     std::vector<multicast_group> groups_;
     std::string interface_ip_;
+    std::string const text_;
 };
