@@ -58,8 +58,8 @@ namespace net {
             char host[NI_MAXHOST] = {};
             char service[NI_MAXSERV] = {};
             if (i->ifa_addr->sa_family == AF_INET || i->ifa_addr->sa_family == AF_INET6) {
-                rv = ::getnameinfo(i->ifa_addr, sizeof(sockaddr_storage), host, sizeof(host),
-                        service, sizeof(service), NI_NUMERICHOST);
+                rv = ::getnameinfo(i->ifa_addr, sizeof(sockaddr_storage), static_cast<char*>(host),
+                        sizeof(host), static_cast<char*>(service), sizeof(service), NI_NUMERICHOST);
                 if (rv != 0) {
                     ::freeifaddrs(ifs);
                     throw std::runtime_error(
@@ -130,8 +130,8 @@ namespace net {
             char host[NI_MAXHOST] = {};
             char service[NI_MAXSERV] = {};
             if (i->ifa_addr->sa_family == AF_INET || i->ifa_addr->sa_family == AF_INET6) {
-                rv = ::getnameinfo(i->ifa_addr, sizeof(sockaddr_storage), host, sizeof(host),
-                        service, sizeof(service), NI_NUMERICHOST);
+                rv = ::getnameinfo(i->ifa_addr, sizeof(sockaddr_storage), static_cast<char*>(host),
+                        sizeof(host), static_cast<char*>(service), sizeof(service), NI_NUMERICHOST);
                 if (rv != 0) {
                     ::freeifaddrs(ifs);
                     throw std::runtime_error(
@@ -139,10 +139,10 @@ namespace net {
                 }
             }
 
-            if (std::strlen(host) == 0)
+            if (std::strlen(static_cast<char const*>(host)) == 0)
                 continue;
 
-            address.assign(host);
+            address.assign(static_cast<char const*>(host));
             break;
         }
 
