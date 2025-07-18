@@ -2,7 +2,6 @@
 #include "util/net_util.hpp"
 #include <arpa/inet.h>
 #include <endian.h>
-#include <fmt/format.h>
 #include <getopt.h>
 #include <net/if.h> // IFNAMSIZ
 #include <netinet/in.h>
@@ -13,7 +12,8 @@
 #include <unistd.h> // ::close
 #include <cerrno>
 #include <cstdint>
-#include <cstring>   // ::basename, std::strerror, std::strncpy
+#include <cstring> // ::basename, std::strerror, std::strncpy
+#include <print>
 #include <stdexcept> // std::runtime_error
 #include <string>
 #include <string_view>
@@ -50,7 +50,7 @@ mcast_recv::mcast_recv(std::string const& interface, std::vector<std::string> co
     }
 
     interface_ip_ = ::inet_ntoa(reinterpret_cast<sockaddr_in*>(&req.ifr_addr)->sin_addr); // NOLINT
-    fmt::print("listening on interface {} ({})\n", interface, interface_ip_);
+    std::println("listening on interface {} ({})", interface, interface_ip_);
 }
 
 int
@@ -58,7 +58,7 @@ mcast_recv::subscribe(std::string_view ip, std::uint16_t port)
 {
     int const sock = ::socket(AF_INET, SOCK_DGRAM, 0);
     if (sock == -1) {
-        fmt::print(stderr, "error: socket: {}\n", std::strerror(errno));
+        std::println(stderr, "error: socket: {}", std::strerror(errno));
         return -1;
     }
 
@@ -66,7 +66,7 @@ mcast_recv::subscribe(std::string_view ip, std::uint16_t port)
     int const yes = 1;
     int rv = ::setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
     if (rv == -1) {
-        fmt::print(stderr, "error: setsockopt(SO_REUSEADDR): {}\n", std::strerror(errno));
+        std::println(stderr, "error: setsockopt(SO_REUSEADDR): {}", std::strerror(errno));
         return -1;
     }
 
@@ -77,7 +77,7 @@ mcast_recv::subscribe(std::string_view ip, std::uint16_t port)
     addr.sin_addr.s_addr = ::inet_addr(std::string(ip).c_str());
     rv = ::bind(sock, reinterpret_cast<sockaddr*>(&addr), sizeof(addr));
     if (rv == -1) {
-        fmt::print(stderr, "error: bind: {}\n", std::strerror(errno));
+        std::println(stderr, "error: bind: {}", std::strerror(errno));
         return -1;
     }
 
@@ -88,7 +88,7 @@ mcast_recv::subscribe(std::string_view ip, std::uint16_t port)
     rv = ::setsockopt(
             sock, IPPROTO_IP, IP_ADD_MEMBERSHIP, reinterpret_cast<char*>(&mreq), sizeof(mreq));
     if (rv == -1) {
-        fmt::print(stderr, "error: setsockopt(IP_ADD_MEMBERSHIP): {}\n", std::strerror(errno));
+        std::println(stderr, "error: setsockopt(IP_ADD_MEMBERSHIP): {}", std::strerror(errno));
         return -1;
     }
 
@@ -103,7 +103,7 @@ mcast_recv::run()
     for (auto const& group : groups_) {
         int const sock = subscribe(group.ip, group.port);
         if (sock == -1) {
-            fmt::print(stderr, "error: subscription failure: {}:{}\n", group.ip, group.port);
+            std::println(stderr, "error: subscription failure: {}:{}", group.ip, group.port);
             return -1;
         }
 
@@ -117,7 +117,7 @@ mcast_recv::run()
     while (true) {
         int const rv = ::ppoll(fds.data(), fds.size(), nullptr, nullptr);
         if (rv == -1) {
-            fmt::print(stderr, "error: ppoll: {}\n", std::strerror(errno));
+            std::println(stderr, "error: ppoll: {}", std::strerror(errno));
             return 1;
         }
         if (rv == 0)
@@ -131,10 +131,10 @@ mcast_recv::run()
             ::ssize_t const nbytes
                     = ::recvfrom(fd.fd, &buf, sizeof(buf), /*flags=*/0, nullptr, nullptr);
             if (nbytes == -1) {
-                fmt::print(stderr, "error: recvfrom: {}\n", std::strerror(errno));
+                std::println(stderr, "error: recvfrom: {}", std::strerror(errno));
                 return 1;
             }
-            fmt::print("received {} bytes\n", nbytes);
+            std::println("received {} bytes", nbytes);
         }
     }
 

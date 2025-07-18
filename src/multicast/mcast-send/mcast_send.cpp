@@ -2,7 +2,6 @@
 #include "util/net_util.hpp"
 #include <arpa/inet.h>
 #include <endian.h>
-#include <fmt/format.h>
 #include <net/if.h> // IFNAMSIZ
 #include <netinet/in.h>
 #include <sys/ioctl.h>
@@ -11,6 +10,7 @@
 #include <unistd.h> // ::close
 #include <cerrno>
 #include <cstring> // std::strerror
+#include <print>
 #include <stdexcept>
 #include <tuple>
 
@@ -47,7 +47,7 @@ mcast_send::mcast_send(
     }
 
     interface_ip_ = ::inet_ntoa(reinterpret_cast<sockaddr_in*>(&req.ifr_addr)->sin_addr); // NOLINT
-    fmt::print("sending on interface {} ({})\n", interface_name, interface_ip_);
+    std::println("sending on interface {} ({})", interface_name, interface_ip_);
 }
 
 int
@@ -57,7 +57,7 @@ mcast_send::run()
     for (auto& group : groups_) {
         group.sock = ::socket(AF_INET, SOCK_DGRAM, 0);
         if (group.sock == -1) {
-            fmt::print(stderr, "error: socket: {}\n", std::strerror(errno));
+            std::println(stderr, "error: socket: {}", std::strerror(errno));
             return 1;
         }
 
@@ -66,7 +66,7 @@ mcast_send::run()
         iface.s_addr = ::inet_addr(interface_ip_.c_str());
         int rv = ::setsockopt(group.sock, IPPROTO_IP, IP_MULTICAST_IF, &iface, sizeof(iface));
         if (rv == -1) {
-            fmt::print(stderr, "error: setsockopt(IP_MULTICAST_IF): {}\n", std::strerror(errno));
+            std::println(stderr, "error: setsockopt(IP_MULTICAST_IF): {}", std::strerror(errno));
             return 1;
         }
     }
@@ -81,7 +81,7 @@ mcast_send::run()
         ::ssize_t const nbytes = ::sendto(group.sock, text_.c_str(), text_.size(),
                 /*flag=*/0, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)); // NOLINT
         if (nbytes == -1) {
-            fmt::print(stderr, "error: sendto: {}\n", std::strerror(errno));
+            std::println(stderr, "error: sendto: {}", std::strerror(errno));
             return 1;
         }
     }

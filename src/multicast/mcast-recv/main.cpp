@@ -1,6 +1,7 @@
 #include "arg_parse.hpp"
 #include "mcast_recv.hpp"
-#include <cstdio> // std::fprintf
+#include <cstdio>  // std::fprintf
+#include <cstdlib> // EXIT_FAILURE, EXIT_SUCCESS
 #include <exception>
 
 

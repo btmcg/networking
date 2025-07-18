@@ -2,11 +2,11 @@
 
 #include "version.h"
 #include "util/compiler.hpp"
-#include <filesystem>
-#include <fmt/format.h>
 #include <getopt.h>
 #include <cstdio>  // std::fprintf, std::FILE
 #include <cstdlib> // std::exit
+#include <filesystem>
+#include <print>
 #include <string>
 #include <vector>
 
@@ -22,7 +22,7 @@ inline cli_args
 arg_parse(int argc, char** argv)
 {
     auto usage = [](std::FILE* outerr, std::filesystem::path const& app) {
-        fmt::print(outerr,
+        std::print(outerr,
                 "usage: {} [-hv] [-i <interface>] <group> [[<group>] ...]\n"
                 "positional arguments:\n"
                 "  group                    multicast group in the for 'ip:port'\n"
@@ -35,8 +35,9 @@ arg_parse(int argc, char** argv)
     };
 
     auto const app = std::filesystem::path(argv[0]).filename();
-    if (argc == 1)
+    if (argc == 1) {
         usage(stderr, app);
+    }
 
     cli_args args;
     while (true) {
@@ -62,7 +63,7 @@ arg_parse(int argc, char** argv)
                 break;
 
             case 'v':
-                fmt::print(stdout, "app_version={}\n{}\n", ::VERSION, get_version_info_multiline());
+                std::println("app_version={}\n{}", ::VERSION, get_version_info_multiline());
                 std::exit(EXIT_SUCCESS);
                 break;
 
@@ -75,7 +76,7 @@ arg_parse(int argc, char** argv)
 
 
     if (optind == argc) {
-        fmt::print(stderr, "missing required argument(s)\n\n");
+        std::println(stderr, "missing required argument(s)\n");
         usage(stderr, app);
     }
 
