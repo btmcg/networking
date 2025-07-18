@@ -9,9 +9,6 @@
 CATCH := third_party/catch2/2.13.2/single_include
 use-catch = $(eval MODULE_CPPFLAGS += -isystem$(CATCH))
 
-FMT := third_party/fmt/7.1.0
-use-fmt = $(eval MODULE_CPPFLAGS += -DFMT_HEADER_ONLY -isystem$(FMT)/include)
-
 ifeq ($(COMPILER),gcc)
   GOOGLE_BENCHMARK := third_party/google-benchmark/gcc-10.2.0/1.5.2
 else
