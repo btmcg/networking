@@ -1,5 +1,5 @@
 #include "tcp_echo_server.hpp"
-#include <cstdio> // std::fprintf
+#include <cstdio>  // std::fprintf
 #include <cstdlib> // EXIT_FAILURE, EXIT_SUCCESS
 #include <exception>
 

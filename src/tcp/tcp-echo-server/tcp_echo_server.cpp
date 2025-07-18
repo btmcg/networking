@@ -1,6 +1,5 @@
 #include "tcp_echo_server.hpp"
 #include <fcntl.h>
-#include <fmt/format.h>
 #include <netdb.h> // ::getaddrinfo
 #include <sys/epoll.h>
 #include <sys/socket.h> // socket calls
@@ -9,7 +8,8 @@
 #include <algorithm>
 #include <cassert>
 #include <cerrno>
-#include <cstring>   // std::memset, std::strerror
+#include <cstring> // std::memset, std::strerror
+#include <print>
 #include <stdexcept> // std::runtime_error
 #include <string>
 
@@ -30,8 +30,7 @@ tcp_echo_server::tcp_echo_server()
 
     // Get local address.
     addrinfo* result = nullptr;
-    int status = ::getaddrinfo(nullptr, std::to_string(port_).c_str(), &hints, &result);
-    if (status != 0) {
+    if (int rv = ::getaddrinfo(nullptr, std::to_string(port_).c_str(), &hints, &result); rv != 0) {
         throw std::runtime_error(std::string("getaddrinfo: ") + std::strerror(errno));
     }
 
@@ -42,8 +41,7 @@ tcp_echo_server::tcp_echo_server()
     }
 
     // Bind
-    status = ::bind(sockfd_, result->ai_addr, result->ai_addrlen);
-    if (status == -1) {
+    if (int rv = ::bind(sockfd_, result->ai_addr, result->ai_addrlen); rv == -1) {
         throw std::runtime_error(std::string("bind: ") + std::strerror(errno));
     }
 
@@ -51,19 +49,16 @@ tcp_echo_server::tcp_echo_server()
 
     // Allow for socket reuse
     int const yes = 1;
-    status = ::setsockopt(sockfd_, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
-    if (status == -1) {
+    if (int rv = ::setsockopt(sockfd_, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)); rv == -1) {
         throw std::runtime_error(std::string("setsockopt (SO_REUSEADDR): ") + std::strerror(errno));
     }
 
-    status = ::setsockopt(sockfd_, SOL_SOCKET, SO_REUSEPORT, &yes, sizeof(yes));
-    if (status == -1) {
+    if (int rv = ::setsockopt(sockfd_, SOL_SOCKET, SO_REUSEPORT, &yes, sizeof(yes)); rv == -1) {
         throw std::runtime_error(std::string("setsockopt (SO_REUSEPORT): ") + std::strerror(errno));
     }
 
     // Set socket as non-blocking
-    status = ::fcntl(sockfd_, F_SETFL, O_NONBLOCK);
-    if (status == -1) {
+    if (int rv = ::fcntl(sockfd_, F_SETFL, O_NONBLOCK); rv == -1) {
         throw std::runtime_error(std::string("fcntl (O_NONBLOCK): ") + std::strerror(errno));
     }
 
@@ -90,20 +85,18 @@ bool
 tcp_echo_server::run()
 {
     // Start listening
-    int result = ::listen(sockfd_, ListenBacklog);
-    if (result == -1) {
-        fmt::print(stderr, "error: listen: {}\n", std::strerror(errno));
+    if (int rv = ::listen(sockfd_, ListenBacklog); rv == -1) {
+        std::println(stderr, "error: listen: {}", std::strerror(errno));
         return false;
     }
-    fmt::print("listening on port {}\n", port_);
+    std::println("listening on port {}", port_);
 
     // Add our listening socket to epoll.
     epoll_event event{};
     event.data.fd = sockfd_;
     event.events = (EPOLLIN | EPOLLET);
-    result = ::epoll_ctl(epollfd_, EPOLL_CTL_ADD, sockfd_, &event);
-    if (result == -1) {
-        fmt::print(stderr, "error: epoll_ctl: {}\n", std::strerror(errno));
+    if (int rv = ::epoll_ctl(epollfd_, EPOLL_CTL_ADD, sockfd_, &event); rv == -1) {
+        std::println(stderr, "error: epoll_ctl: \n", std::strerror(errno));
         return false;
     }
 
@@ -112,7 +105,7 @@ tcp_echo_server::run()
         int const num_events = ::epoll_wait(
                 epollfd_, static_cast<epoll_event*>(events), EpollMaxEvents, EpollTimeoutMsecs);
         if (num_events == -1) {
-            fmt::print(stderr, "error: epoll_wait: {}\n", std::strerror(errno));
+            std::println(stderr, "error: epoll_wait: {}", std::strerror(errno));
             return false;
         }
 
@@ -120,7 +113,7 @@ tcp_echo_server::run()
         for (int i = 0; i < num_events; ++i) {
             // Check for flag that we aren't listening for. Not sure if this is necessary.
             if ((events[i].events & EPOLLERR) || (events[i].events & EPOLLHUP)) { // NOLINT
-                fmt::print(stderr, "error: unexpected event on fd {}\n", i);
+                std::println(stderr, "error: unexpected event on fd {}", i);
 
                 auto itr = std::find(clients_.begin(), clients_.end(), events[i].data.fd); // NOLINT
                 assert(itr != clients_.end());
@@ -132,12 +125,14 @@ tcp_echo_server::run()
 
             if (events[i].data.fd == sockfd_) {                                // NOLINT
                 bool const status = on_incoming_connection(events[i].data.fd); // NOLINT
-                if (!status)
+                if (!status) {
                     return false;
+                }
             } else {
                 bool const status = on_incoming_data(events[i].data.fd); // NOLINT
-                if (!status)
+                if (!status) {
                     return false;
+                }
             }
         } // for each event
     }
@@ -161,7 +156,7 @@ tcp_echo_server::on_incoming_connection(int)
         throw std::runtime_error(std::string("accept: ") + std::strerror(errno));
     }
 
-    fmt::print(stderr, "error: on_incoming_connection: Client connected on socket fd: {}\n",
+    std::println(stderr, "error: on_incoming_connection: Client connected on socket fd: {}",
             accepted_sock);
 
     // Successfully connected. Store the new fd.
@@ -171,9 +166,8 @@ tcp_echo_server::on_incoming_connection(int)
     epoll_event event{};
     event.events = (EPOLLIN | EPOLLET);
     event.data.fd = accepted_sock;
-    int const result = ::epoll_ctl(epollfd_, EPOLL_CTL_ADD, accepted_sock, &event);
-    if (result == -1) {
-        fmt::print(stderr, "error: epoll_ctl (EPOLL_CTL_ADD): {}\n", std::strerror(errno));
+    if (int rv = ::epoll_ctl(epollfd_, EPOLL_CTL_ADD, accepted_sock, &event); rv == -1) {
+        std::println(stderr, "error: epoll_ctl (EPOLL_CTL_ADD): {}", std::strerror(errno));
         return false;
     }
 
@@ -188,13 +182,13 @@ tcp_echo_server::on_incoming_data(int fd)
 
     ::ssize_t const bytes_recvd = ::recv(fd, &buf, sizeof(buf), 0);
     if (bytes_recvd == -1) {
-        fmt::print(stderr, "error: recv: {}\n", std::strerror(errno));
+        std::println(stderr, "error: recv: {}", std::strerror(errno));
         return false;
     }
 
     // Client disconnected
     if (bytes_recvd == 0) {
-        fmt::print(stderr, "error: on_incoming_data: client on fd {} disconnected\n", fd);
+        std::println(stderr, "error: on_incoming_data: client on fd {} disconnected", fd);
 
         auto itr = std::find(clients_.begin(), clients_.end(), fd);
         assert(itr != clients_.end());
@@ -205,7 +199,7 @@ tcp_echo_server::on_incoming_data(int fd)
         event.data.fd = fd;
         int const result = ::epoll_ctl(epollfd_, EPOLL_CTL_DEL, fd, &event);
         if (result == -1) {
-            fmt::print(stderr, "error: epoll_ctl (EPOLL_CTL_DEL): {}\n", std::strerror(errno));
+            std::println(stderr, "error: epoll_ctl (EPOLL_CTL_DEL): {}", std::strerror(errno));
             return false;
         }
 
@@ -216,11 +210,11 @@ tcp_echo_server::on_incoming_data(int fd)
     // Echo
     ::ssize_t const bytes_sent = ::send(fd, &buf, static_cast<std::size_t>(bytes_recvd), 0);
     if (bytes_sent == -1) {
-        fmt::print(stderr, "error: send: {}\n", std::strerror(errno));
+        std::println(stderr, "error: send: {}", std::strerror(errno));
         return false;
     }
 
     buf[bytes_recvd - 1] = '\0'; // NOLINT
-    fmt::print("on_incoming_data fd={}, buf={}\n", fd, buf);
+    std::println("on_incoming_data fd={}, buf={}", fd, buf);
     return true;
 }
