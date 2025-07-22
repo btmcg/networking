@@ -40,13 +40,6 @@ tcp_echo_server::tcp_echo_server()
         throw std::runtime_error(std::string("socket: ") + std::strerror(errno));
     }
 
-    // Bind
-    if (int rv = ::bind(sockfd_, result->ai_addr, result->ai_addrlen); rv == -1) {
-        throw std::runtime_error(std::string("bind: ") + std::strerror(errno));
-    }
-
-    ::freeaddrinfo(result);
-
     // Allow for socket reuse
     int const yes = 1;
     if (int rv = ::setsockopt(sockfd_, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)); rv == -1) {
@@ -56,6 +49,13 @@ tcp_echo_server::tcp_echo_server()
     if (int rv = ::setsockopt(sockfd_, SOL_SOCKET, SO_REUSEPORT, &yes, sizeof(yes)); rv == -1) {
         throw std::runtime_error(std::string("setsockopt (SO_REUSEPORT): ") + std::strerror(errno));
     }
+
+    // Bind
+    if (int rv = ::bind(sockfd_, result->ai_addr, result->ai_addrlen); rv == -1) {
+        throw std::runtime_error(std::string("bind: ") + std::strerror(errno));
+    }
+
+    ::freeaddrinfo(result);
 
     // Set socket as non-blocking
     if (int rv = ::fcntl(sockfd_, F_SETFL, O_NONBLOCK); rv == -1) {
